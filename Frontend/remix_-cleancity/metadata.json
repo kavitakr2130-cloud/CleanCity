@@ -1,0 +1,12 @@
+{
+  "name": "Remix: CleanCity",
+  "description": "Smart Grievance Management System with citizens portal (photo capture, GPS, tracking, rewards) and admin dashboard (GIS maps, workforce assignment, analytics reports).",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
