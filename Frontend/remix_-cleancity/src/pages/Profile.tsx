@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getProfile, updateProfile } from '../services/api';
+import { getProfile, updateProfile, BASE_URL } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { 
   Award, Sparkles, CheckCircle2, Gift, Check, Edit3, Camera, Upload, X, 
@@ -25,12 +25,21 @@ const [user, setUser] = useState<any>(null);
 useEffect(() => {
   const loadProfile = async () => {
     const data = await getProfile();
+
+    console.log("PROFILE API DATA:", data.user);
+
     setUser(data.user);
     setPoints(data.user.clean_points || 0);
     setEditName(data.user.full_name || "");
     setEditEmail(data.user.email || "");
     setEditPhone(data.user.mobile_number || "");
-    setEditAvatar(AVATAR_PRESETS[0]);
+
+    if (data.user.profile_photo) {
+      const photoPath = data.user.profile_photo.replace(/\\/g, "/");
+      setEditAvatar(`${BASE_URL}/${photoPath}`);
+    } else {
+      setEditAvatar(AVATAR_PRESETS[0]);
+    }
   };
 
   loadProfile();
@@ -47,6 +56,7 @@ useEffect(() => {
   const [editAvatar, setEditAvatar] = useState("");
   const [editEmail, setEditEmail] = useState("");
   const [editPhone, setEditPhone] = useState("");
+  const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
   
   // Notification Settings states
   const [pushNotifications, setPushNotifications] = useState(() => {
@@ -102,15 +112,14 @@ useEffect(() => {
   }, [user, currentLanguage]);
 
   // Keep state in sync if context user changes
-  useEffect(() => {
-     if (!user) return;
-    
-    setEditName(user.full_name);
-    setEditAvatar(user.avatar);
-    setEditEmail(user.email || '');
-    setEditPhone(user.mobile_number || '');
-    setPoints(user.clean_points);
-  }, [user]);
+useEffect(() => {
+  if (!user) return;
+
+  setEditName(user.full_name || '');
+  setEditEmail(user.email || '');
+  setEditPhone(user.mobile_number || '');
+  setPoints(user.clean_points || 0);
+}, [user]);
 
   // Camera stream source binding
   useEffect(() => {
@@ -185,18 +194,23 @@ useEffect(() => {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setEditAvatar(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+
+  if (file) {
+    setProfilePhotoFile(file);
+
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setEditAvatar(event.target.result as string);
+      }
+    };
+
+    reader.readAsDataURL(file);
+  }
+};
 
 const handleSave = async () => {
   if (!editName.trim()) {
@@ -210,11 +224,12 @@ const handleSave = async () => {
   }
 
   try {
-    await updateProfile(
-      editName,
-      editEmail,
-      editPhone
-    );
+    const response = await updateProfile(
+  editName,
+  editEmail,
+  editPhone,
+  profilePhotoFile
+);
 
     updateUserProfile(
       editName,
@@ -842,7 +857,6 @@ const totalResolved = user?.resolved_complaints || 0;
             id="trigger-edit-profile-btn"
             onClick={() => {
               setEditName(user.full_name);
-              setEditAvatar(user.avatar);
               setEditEmail(user.email || '');
               setEditPhone(user.mobile_number || '');
               setIsEditing(true);

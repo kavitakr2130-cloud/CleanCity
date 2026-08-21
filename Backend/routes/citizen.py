@@ -51,6 +51,7 @@ def get_profile(current_user):
             u.role,
             u.is_verified,
             u.clean_points,
+            u.profile_photo,
             u.created_at,
 
             (
@@ -192,31 +193,60 @@ def clear_notifications(current_user):
 @token_required
 def update_profile(current_user):
 
-    data = request.get_json()
+    full_name = request.form.get("full_name")
+    email = request.form.get("email")
+    mobile_number = request.form.get("mobile_number")
 
-    full_name = data.get("full_name")
-    email = data.get("email")
-    mobile_number = data.get("mobile_number")
+    profile_photo = request.files.get("profile_photo")
+
+    profile_photo_path = None
+
+    # Save profile photo if uploaded
+    if profile_photo:
+        filename = f"{uuid.uuid4().hex}_{secure_filename(profile_photo.filename)}"
+        profile_photo_path = os.path.join(UPLOAD_FOLDER, filename)
+
+        profile_photo.save(profile_photo_path)
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute(
-        """
-        UPDATE users
-        SET
-            full_name = %s,
-            email = %s,
-            mobile_number = %s
-        WHERE user_id = %s
-        """,
-        (
-            full_name,
-            email,
-            mobile_number,
-            current_user["user_id"]
+    if profile_photo_path:
+        cursor.execute(
+            """
+            UPDATE users
+            SET
+                full_name = %s,
+                email = %s,
+                mobile_number = %s,
+                profile_photo = %s
+            WHERE user_id = %s
+            """,
+            (
+                full_name,
+                email,
+                mobile_number,
+                profile_photo_path,
+                current_user["user_id"]
+            )
         )
-    )
+    else:
+        cursor.execute(
+            """
+            UPDATE users
+            SET
+                full_name = %s,
+                email = %s,
+                mobile_number = %s
+            WHERE user_id = %s
+            """,
+            (
+                full_name,
+                email,
+                mobile_number,
+                current_user["user_id"]
+            )
+        )
 
     conn.commit()
 
@@ -224,7 +254,8 @@ def update_profile(current_user):
     conn.close()
 
     return jsonify({
-        "message": "Profile updated successfully"
+        "message": "Profile updated successfully",
+        "profile_photo": profile_photo_path
     }), 200   
     
 # -------------------------------
