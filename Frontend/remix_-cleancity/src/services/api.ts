@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:5000";
+export const BASE_URL = "http://127.0.0.1:5000";
 
 // ---------------------------
 // Citizen APIs
@@ -124,30 +124,41 @@ export const getProfile = async () => {
 export const updateProfile = async (
   full_name: string,
   email: string,
-  mobile_number: string
+  mobile_number: string,
+  profile_photo?: File | null
 ) => {
   const token = localStorage.getItem("token");
+
+  const formData = new FormData();
+
+  formData.append("full_name", full_name);
+  formData.append("email", email);
+  formData.append("mobile_number", mobile_number);
+
+  if (profile_photo) {
+    formData.append("profile_photo", profile_photo);
+  }
 
   const response = await fetch(`${BASE_URL}/citizen/profile`, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      full_name,
-      email,
-      mobile_number,
-    }),
+    body: formData,
   });
 
   return response.json();
 };
 
+// ---------------------------
+// Get My Complaints
+// ---------------------------
+
 export const getMyComplaints = async () => {
   const token = localStorage.getItem("token");
 
   const response = await fetch(`${BASE_URL}/citizen/my-complaints`, {
+    method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
     },

@@ -1,8 +1,13 @@
 from flask import Blueprint, jsonify, request
 from auth_middleware import token_required
 from database import get_db_connection
+from werkzeug.utils import secure_filename
+import os
+import uuid
 
 admin_bp = Blueprint("admin", __name__)
+
+UPLOAD_FOLDER = "uploads"
 
 
 # -------------------------------
@@ -721,7 +726,8 @@ def get_admin_profile(current_admin):
                 full_name,
                 email,
                 mobile_number,
-                designation
+                designation,
+                profile_photo
             FROM admins
             WHERE admin_id = %s
         """, (current_admin["admin_id"],))
@@ -747,31 +753,71 @@ def update_admin_profile(current_admin):
     if current_admin["role"] != "Admin":
         return jsonify({"message": "Access denied"}), 403
 
-    data = request.get_json()
+    # Get form data
+    full_name = request.form.get("name")
+    email = request.form.get("email")
+    phone = request.form.get("phone")
+    designation = request.form.get("role")
+
+    # Get uploaded profile photo
+    profile_photo = request.files.get("profile_photo")
+
+    profile_photo_path = None
+
+    # Save profile photo if uploaded
+    if profile_photo:
+        filename = f"{uuid.uuid4().hex}_{secure_filename(profile_photo.filename)}"
+        profile_photo_path = os.path.join(UPLOAD_FOLDER, filename)
+
+        profile_photo.save(profile_photo_path)
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        cursor.execute("""
-            UPDATE admins
-            SET
-                full_name = %s,
-                email = %s,
-                mobile_number = %s,
-                designation = %s
-            WHERE admin_id = %s
-        """, (
-            data["name"],
-            data["email"],
-            data["phone"],
-            data["role"],
-            current_admin["admin_id"]
-        ))
+
+        if profile_photo_path:
+            cursor.execute("""
+                UPDATE admins
+                SET
+                    full_name = %s,
+                    email = %s,
+                    mobile_number = %s,
+                    designation = %s,
+                    profile_photo = %s
+                WHERE admin_id = %s
+            """, (
+                full_name,
+                email,
+                phone,
+                designation,
+                profile_photo_path,
+                current_admin["admin_id"]
+            ))
+
+        else:
+            cursor.execute("""
+                UPDATE admins
+                SET
+                    full_name = %s,
+                    email = %s,
+                    mobile_number = %s,
+                    designation = %s
+                WHERE admin_id = %s
+            """, (
+                full_name,
+                email,
+                phone,
+                designation,
+                current_admin["admin_id"]
+            ))
 
         conn.commit()
 
-        return jsonify({"message": "Profile updated successfully"}), 200
+        return jsonify({
+            "message": "Profile updated successfully",
+            "profile_photo": profile_photo_path
+        }), 200
 
     except Exception as e:
         conn.rollback()
@@ -779,7 +825,7 @@ def update_admin_profile(current_admin):
 
     finally:
         cursor.close()
-        conn.close()  
+        conn.close() 
         
 # ----------------------------------------------------
 # Get Admin Notifications
