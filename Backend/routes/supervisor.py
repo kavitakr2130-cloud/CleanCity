@@ -1,4 +1,7 @@
 from flask import Blueprint, jsonify, request
+import os
+import uuid
+from werkzeug.utils import secure_filename
 import bcrypt
 import jwt
 from datetime import datetime, timedelta
@@ -8,6 +11,7 @@ from config import Config
 from auth_middleware import token_required
 
 supervisor_bp = Blueprint("supervisor", __name__)
+UPLOAD_FOLDER = Config.UPLOAD_FOLDER
 
 
 # ----------------------------------------------------
@@ -733,6 +737,7 @@ def profile(current_supervisor):
             mobile_number,
             zone_id,
             status,
+            profile_photo,
             created_at
 
         FROM supervisors
@@ -760,11 +765,20 @@ def update_profile(current_supervisor):
             "message": "Access denied"
         }), 403
 
-    data = request.get_json()
+    data = request.form
+
+    
 
     full_name = data.get("full_name")
     email = data.get("email")
     mobile_number = data.get("phone")
+    profile_photo = request.files.get("profile_photo")
+    profile_photo_path = None
+
+    if profile_photo:
+       filename = f"{uuid.uuid4().hex}_{secure_filename(profile_photo.filename)}"
+       profile_photo_path = os.path.join(UPLOAD_FOLDER, filename)
+       profile_photo.save(profile_photo_path)
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -774,12 +788,14 @@ def update_profile(current_supervisor):
         SET
             full_name=%s,
             email=%s,
-            mobile_number=%s
+            mobile_number=%s,
+            profile_photo=%s
         WHERE supervisor_id=%s
     """,(
         full_name,
         email,
         mobile_number,
+        profile_photo_path,
         current_supervisor["supervisor_id"]
     ))
 

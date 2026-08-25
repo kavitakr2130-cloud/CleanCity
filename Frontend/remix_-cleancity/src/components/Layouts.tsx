@@ -23,6 +23,7 @@ export const CitizenLayout: React.FC<{ children: React.ReactNode }> = ({ childre
   t
 } = useApp();
 const [notifications, setNotifications] = useState<any[]>([]);
+
   const location = useLocation();
   const navigate = useNavigate();
 React.useEffect(() => {
@@ -275,6 +276,61 @@ const [notifications, setNotifications] = useState<any[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [supervisorPhoto, setSupervisorPhoto] = useState("");
+  const [adminPhoto, setAdminPhoto] = useState("");
+  React.useEffect(() => {
+  if (authoritySubRole !== "Supervisor") return;
+
+  const loadSupervisorProfile = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      "http://127.0.0.1:5000/supervisor/profile",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.profile_photo) {
+      setSupervisorPhoto(
+        `http://127.0.0.1:5000/${data.profile_photo.replace(/\\/g, "/")}`
+      );
+    }
+  };
+
+   loadSupervisorProfile();
+}, [authoritySubRole]);
+
+React.useEffect(() => {
+  if (authoritySubRole !== "Admin") return;
+
+  const loadAdminProfile = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      "http://127.0.0.1:5000/admin/profile",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.profile_photo) {
+      setAdminPhoto(
+        `http://127.0.0.1:5000/${data.profile_photo.replace(/\\/g, "/")}`
+      );
+    }
+  };
+
+  loadAdminProfile();
+}, [authoritySubRole]);
 React.useEffect(() => {
   const loadNotifications = async () => {
     const data = await getAdminNotifications();
@@ -337,7 +393,7 @@ default:
     subtitle: 'Zone Supervisor',
     name: 'Rahul Sharma',
     roleLabel: 'Shivajinagar Zone',
-    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+avatar: supervisorPhoto || 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
   };
       case 'Field Worker':
         return {
@@ -354,7 +410,7 @@ default:
           subtitle: 'Central Administrator',
           name: 'Admin Dispatcher',
           roleLabel: 'Central Control',
-          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+          avatar: adminPhoto || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
         };
     }
   };
@@ -453,7 +509,7 @@ default:
 
             {/* Interactive Admin Notification Dropdown Bell */}
             <div className="relative">
-              <button
+              <div
                 onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
                 className="hover:bg-slate-100 rounded-full p-2.5 transition-colors relative cursor-pointer flex items-center justify-center"
               >
@@ -523,74 +579,105 @@ default:
                         <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border border-white animate-pulse" />
                       )}
 
-                      {notifDropdownOpen && (
-                        <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl border border-slate-100 shadow-2xl z-50 p-4 text-left space-y-3 animate-slide-up">
-                          <div className="flex justify-between items-center border-b border-slate-50 pb-2">
-                            <span className="text-xs font-black text-slate-800 uppercase tracking-wider">System Alerts ({count})</span>
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setNotifDropdownOpen(false);
-                              }}
-                              className="text-xs font-black text-slate-400 hover:text-slate-600"
-                            >
-                              ✕
-                            </button>
-                          </div>
+                     {notifDropdownOpen && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/20 backdrop-blur-[2px]"
+    onClick={() => setNotifDropdownOpen(false)}
+  >
+    {/* Notification Panel */}
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="w-[380px] max-w-[90vw] rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden"
+    >
+      {/* Header */}
+      <div className="flex justify-between items-center px-4 py-3 bg-slate-50 border-b border-slate-200">
+        <div>
+          <span className="text-xs font-black text-slate-800 uppercase tracking-wider">
+            System Alerts
+          </span>
+          <span className="ml-2 text-[9px] font-bold text-slate-400">
+            ({count})
+          </span>
+        </div>
 
-                          <div className="max-h-64 overflow-y-auto space-y-2.5 pr-1">
-                            {count === 0 ? (
-                              <div className="p-6 text-center text-slate-400 text-[10px] font-bold">
-                                🔔 Telemetry nominal. No pending alerts.
-                              </div>
-                            ) : (
-                              alertsList.map((alert) => (
-                                <div 
-                                 key={alert.notification_id}
-                                 onClick={async () => {
-                                    await markAdminNotificationRead(alert.notification_id);
+        <button
+          onClick={() => setNotifDropdownOpen(false)}
+          className="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-all"
+        >
+          ✕
+        </button>
+      </div>
 
-                                    setNotifications(prev =>
-                                      prev.map(n =>
-                                        n.notification_id === alert.notification_id
-                                          ? { ...n, is_read: true }
-                                          : n
-                                      )
-                                    );
+      {/* Notifications */}
+      <div className="max-h-72 overflow-y-auto p-3 space-y-2 bg-white">
+        {count === 0 ? (
+          <div className="p-6 text-center text-slate-400 text-[10px] font-bold">
+            🔔 Telemetry nominal. No pending alerts.
+          </div>
+        ) : (
+          alertsList.map((alert) => (
+            <div
+              key={alert.notification_id}
+              onClick={async () => {
+                await markAdminNotificationRead(alert.notification_id);
 
-                                    setNotifDropdownOpen(false);
+                setNotifications(prev =>
+                  prev.map(n =>
+                    n.notification_id === alert.notification_id
+                      ? { ...n, is_read: true }
+                      : n
+                  )
+                );
 
-                                    navigate(
-                                      authoritySubRole === "Supervisor"
-                                        ? "/supervisor/dashboard"
-                                        : authoritySubRole === "Field Worker"
-                                        ? "/worker/dashboard"
-                                        : "/admin/dashboard"
-                                    );
-                                  }}
-                                  className={`p-2.5 rounded-xl border flex gap-2 items-start hover:bg-slate-50 cursor-pointer transition-colors ${alert.colorClass}`}
-                                >
-                                  <span className="text-xs mt-0.5">{alert.icon}</span>
-                                  <div className="flex-grow min-w-0">
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-[8px] font-black uppercase tracking-wider">{alert.badge}</span>
-                                      <span className="text-[8px] opacity-80 font-semibold">{alert.time}</span>
-                                    </div>
-                                    <h5 className="text-[10px] font-black mt-1 truncate">{alert.title}</h5>
-                                    <p className="text-[9px] opacity-90 truncate mt-0.5">{alert.message}</p>
-                                  </div>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        </div>
-                      )}
+                setNotifDropdownOpen(false);
+
+                navigate(
+                  authoritySubRole === "Supervisor"
+                    ? "/supervisor/dashboard"
+                    : authoritySubRole === "Field Worker"
+                    ? "/worker/dashboard"
+                    : "/admin/dashboard"
+                );
+              }}
+              className={`group p-3 rounded-xl border flex gap-3 items-start cursor-pointer transition-all hover:shadow-md hover:-translate-y-[1px] ${alert.colorClass}`}
+            >
+              {/* Colored Icon */}
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shrink-0 text-sm shadow-sm border border-white/80">
+                {alert.icon}
+              </div>
+
+              {/* Notification Content */}
+              <div className="flex-grow min-w-0">
+                <div className="flex justify-between items-center gap-2">
+                  <span className="text-[8px] font-black uppercase tracking-wider">
+                    {alert.badge}
+                  </span>
+
+                  <span className="text-[8px] opacity-70 font-semibold whitespace-nowrap">
+                    {alert.time}
+                  </span>
+                </div>
+
+                <h5 className="text-[10px] font-black mt-1 truncate">
+                  {alert.title}
+                </h5>
+
+                <p className="text-[9px] opacity-80 mt-1 leading-relaxed line-clamp-2">
+                  {alert.message}
+                </p>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  </div>
+)}
                     </>
                   );
                 })()}
-              </button>
+              </div>
             </div>
-
             <div className="relative">
               <button 
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
@@ -615,34 +702,34 @@ default:
                     onClick={() => {
                       setProfileDropdownOpen(false);
                       if (authoritySubRole === "Admin") {
-  navigate("/admin/profile");
-} else if (authoritySubRole === "Supervisor") {
-  navigate("/supervisor/profile");
-} else {
-  navigate("/worker/profile");
-}
+                      navigate("/admin/profile");
+                    } else if (authoritySubRole === "Supervisor") {
+                      navigate("/supervisor/profile");
+                    } else {
+                      navigate("/worker/profile");
+                    }
                     }}
                     className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors cursor-pointer text-left"
                   >
                     <User className="w-4 h-4 text-slate-400" />
                     My Profile
                   </button>
-                  <button
-                    onClick={() => {
-                      setProfileDropdownOpen(false);
-                     if (authoritySubRole === "Admin") {
-  navigate("/admin/settings");
-} else if (authoritySubRole === "Supervisor") {
-  navigate("/supervisor/settings");
-} else {
-  navigate("/worker/settings");
-}
-                    }}
-                    className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors cursor-pointer text-left"
-                  >
-                    <Settings className="w-4 h-4 text-slate-400" />
-                    Settings
-                  </button>
+                 {authoritySubRole !== "Supervisor" && (
+              <button 
+                onClick={() => { 
+                  setProfileDropdownOpen(false); 
+                  if (authoritySubRole === "Admin") { 
+                    navigate("/admin/settings"); 
+                  } else { 
+                    navigate("/worker/settings"); 
+                  } 
+                }} 
+                className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors cursor-pointer text-left" 
+              > 
+                <Settings className="w-4 h-4 text-slate-400" /> 
+                Settings 
+              </button>
+                  )}
                   <button
                     onClick={() => {
                       setProfileDropdownOpen(false);

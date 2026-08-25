@@ -239,12 +239,13 @@ const handleSave = async () => {
       editAvatar
     );
 
-    setUser((prev: any) => ({
-      ...prev,
-      full_name: editName,
-      email: editEmail,
-      mobile_number: editPhone,
-    }));
+   setUser((prev: any) => ({
+  ...prev,
+  full_name: editName,
+  email: editEmail,
+  mobile_number: editPhone,
+  avatar: editAvatar,
+}));
 
     setIsEditing(false);
 
@@ -574,7 +575,7 @@ const totalResolved = user?.resolved_complaints || 0;
         <section id="citizen-badge-card" className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col items-center text-center space-y-4">
           <div className="relative">
             <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-emerald-600 shadow-md">
-              <img className="w-full h-full object-cover" src={user.avatar} alt="Citizen Profile" />
+              <img className="w-full h-full object-cover" src={editAvatar}alt="Citizen Profile" />
             </div>
             <span className="absolute bottom-0 right-0 bg-emerald-600 text-white p-2 rounded-full shadow border-2 border-white flex items-center justify-center">
               <Award className="w-4 h-4" />

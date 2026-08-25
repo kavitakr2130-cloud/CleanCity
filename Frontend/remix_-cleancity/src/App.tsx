@@ -63,6 +63,8 @@ const CitizenRoutesWrapper: React.FC<{ children: React.ReactNode }> = ({ childre
 const WorkerRoutesWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isLoggedIn, currentRole } = useApp();
 
+    console.log("WORKER GUARD:", { isLoggedIn, currentRole });
+
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
   }
