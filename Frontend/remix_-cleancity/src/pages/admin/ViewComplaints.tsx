@@ -184,7 +184,7 @@ React.useEffect(() => {
 
     if (data.complaints) {
       setDbComplaints(data.complaints);
-      console.log(data.complaints.length);
+     console.log("FIRST COMPLAINT:", data.complaints[0]);
     }
   };
 
@@ -225,7 +225,10 @@ React.useEffect(() => {
 
   // Find active records based on selected IDs
 const assignTarget = React.useMemo(
-  () => dbComplaints.find(c => c.complaint_id === assignTargetId) || null,
+  () =>
+    dbComplaints.find(
+      c => String(c.complaint_id) === String(assignTargetId)
+    ) || null,
   [dbComplaints, assignTargetId]
 );
   console.log("assignTargetId:", assignTargetId);
@@ -844,7 +847,7 @@ console.log("zoneComplaints:", zoneComplaints.length);
 
     <button
       type="button"
-      onClick={() => setViewTargetId(comp.id)}
+     onClick={() => setViewTargetId(String(comp.complaint_id))}
       className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 p-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1"
     >
       <Eye className="w-3.5 h-3.5" />
@@ -1491,7 +1494,7 @@ const unassigned = dbComplaints.filter((c: any) => {
 
                   return (
                     <tr 
-                      key={comp.id} 
+                      key={comp.complaint_id}
                       className={`hover:bg-slate-50/50 transition-colors ${
                         isOverdue && comp.status !== 'RESOLVED' && comp.status !== 'VERIFIED'
                           ? 'bg-rose-50/20'
@@ -1594,18 +1597,23 @@ const unassigned = dbComplaints.filter((c: any) => {
   ) && (
     <button
       onClick={async () => {
-        console.log("Assign clicked");
+      console.log("🔥 SUBMITTED ASSIGN CLICKED");
 
-        setAssignTargetId(comp.complaint_id);
+       setAssignTargetId(String(comp.complaint_id));
         setSelectedTeamId("");
 
         try {
+          console.log("1️⃣ BEFORE getSupervisors");
           const data = await getSupervisors();
+          console.log("2️⃣ AFTER getSupervisors", data);
 
-          console.log("Supervisor API:", data);
+         console.log("🔥 FULL SUPERVISOR RESPONSE:", JSON.stringify(data, null, 2));
+           console.log("SETTING SUPERVISORS:", data.supervisors);
           setSupervisors(data.supervisors || []);
+          
+          console.log("SETTING SUPERVISORS:", data.supervisors);
         } catch (err) {
-          console.error(err);
+          console.error("Supervisor fetch error:", err);
         }
       }}
       className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-1.5 px-3 rounded-xl flex items-center gap-1 transition-colors cursor-pointer"
@@ -1718,7 +1726,7 @@ const unassigned = dbComplaints.filter((c: any) => {
 
                   <div className="pt-3 border-t border-slate-50 flex gap-2">
                     <button
-                      onClick={() => setViewTargetId(comp.id)}
+                    onClick={() => setViewTargetId(String(comp.complaint_id))}
                       className="flex-grow bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 font-bold text-xs py-2 rounded-xl flex items-center justify-center gap-1 transition-colors cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" />
@@ -1726,10 +1734,20 @@ const unassigned = dbComplaints.filter((c: any) => {
                     </button>
                   {comp.status === "Submitted" && (
                       <button
-                        onClick={() => {
-                          setAssignTargetId(comp.id);
-                          setSelectedTeamId(teams[0]?.id || '');
-                        }}
+                      onClick={async () => {
+  setAssignTargetId(String(comp.complaint_id));
+  setSelectedTeamId("");
+
+  try {
+    const data = await getSupervisors();
+
+    console.log("🔥 Supervisor API:", data);
+
+    setSupervisors(data.supervisors || []);
+  } catch (err) {
+    console.error("Supervisor fetch error:", err);
+  }
+}}
                         className="flex-grow bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 rounded-xl flex items-center justify-center gap-1 transition-colors cursor-pointer"
                       >
                         <UserPlus className="w-3.5 h-3.5" />

@@ -60,6 +60,7 @@ export const SupervisorProfile: React.FC = () => {
  const [editForm, setEditForm] = useState<SupervisorProfileData>(DEFAULT_PROFILE);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [profileFile, setProfileFile] = useState<File | null>(null);
 
 useEffect(() => {
   const fetchProfile = async () => {
@@ -86,7 +87,9 @@ useEffect(() => {
 }
 
      const supervisorProfile: SupervisorProfileData = {
-  avatar: DEFAULT_PROFILE.avatar,
+ avatar: data.profile_photo
+  ? `http://127.0.0.1:5000/${data.profile_photo.replace(/\\/g, "/")}`
+  : DEFAULT_PROFILE.avatar,
   name: data.full_name || DEFAULT_PROFILE.name,
 role: data.role || "Zone Supervisor",
   employeeId: data.employee_id || DEFAULT_PROFILE.employeeId,
@@ -145,19 +148,24 @@ role: data.role || "Zone Supervisor",
   return;
 }
 
+const formData = new FormData();
+
+formData.append("full_name", editForm.name);
+formData.append("email", editForm.email);
+formData.append("phone", editForm.phone);
+
+if (profileFile) {
+  formData.append("profile_photo", profileFile);
+}
+
   const response = await fetch(
   "http://127.0.0.1:5000/supervisor/profile",
   {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      full_name: editForm.name,
-      email: editForm.email,
-      phone: editForm.phone,
-    }),
+   headers: {
+  Authorization: `Bearer ${token}`,
+},
+body: formData,
   }
 );
   
@@ -178,11 +186,11 @@ setSaveSuccess(true);
   }
 };
 
-  return (
-    <div className="space-y-6 max-h-full overflow-y-auto pb-10 text-left">
+ return (
+  <div className="space-y-6 min-h-[calc(100vh-140px)] flex flex-col justify-center pb-10">
         
-        {/* Breadcrumb Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-100">
+    {/* Breadcrumb Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-100 max-w-6xl mx-auto w-full">
           <div>
             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
              <span 
@@ -219,7 +227,7 @@ setSaveSuccess(true);
         )}
 
         {/* Profile Card & Info Form */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start max-w-6xl mx-auto">
           
           {/* Left Column: Summary Avatar & Status Card */}
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center space-y-6">
@@ -234,7 +242,7 @@ setSaveSuccess(true);
               {isEditing && (
                 <button
                   type="button"
-                  onClick={() => setShowAvatarPicker(!showAvatarPicker)}
+                 onClick={() => document.getElementById("profile-photo")?.click()}
                   className="absolute bottom-1 right-1 p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg transition-transform hover:scale-105 cursor-pointer"
                   title="Choose Avatar"
                 >
@@ -242,6 +250,23 @@ setSaveSuccess(true);
                 </button>
               )}
             </div>
+            {/* ADD THE NEW INPUT HERE */}
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="profile-photo"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setProfileFile(file);
+                      setEditForm(prev => ({
+                        ...prev,
+                        avatar: URL.createObjectURL(file)
+                      }));
+                    }
+                  }}
+                />
 
             {showAvatarPicker && isEditing && (
               <div className="w-full border-t border-slate-100 pt-4 space-y-3">
