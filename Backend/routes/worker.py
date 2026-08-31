@@ -2,7 +2,6 @@ from flask import Blueprint, jsonify, request
 import bcrypt
 import jwt
 from datetime import datetime, timedelta
-
 from database import get_db_connection
 from config import Config
 from auth_middleware import token_required
@@ -204,6 +203,7 @@ def worker_dashboard_data(current_worker):
             full_name,
             status,
             crew_name
+            profile_photo
         FROM workers
         WHERE worker_id=%s
     """, (worker_id,))
@@ -439,6 +439,7 @@ def profile(current_worker):
             full_name,
             email,
             mobile_number,
+            profile_photo,
             crew_name,
             average_rating,
             status,
@@ -456,8 +457,154 @@ def profile(current_worker):
 
     cursor.close()
     conn.close()
-
+    if not worker:
+      return jsonify({
+        "message": "Worker not found"
+    }), 404
     return jsonify(worker)
+
+# ----------------------------------------------------
+# Update Worker Profile
+# ----------------------------------------------------
+@worker_bp.route("/profile", methods=["PUT"])
+@token_required
+def update_profile(current_worker):
+
+    if current_worker["role"] != "Worker":
+        return jsonify({
+            "message": "Access denied"
+        }), 403
+
+    # ---------------------------------------------
+    # Get data from FormData
+    # ---------------------------------------------
+    employee_id = request.form.get("employeeId")
+    full_name = request.form.get("name")
+    email = request.form.get("email")
+    mobile_number = request.form.get("phone")
+
+    # Uploaded profile photo
+    profile_photo = request.files.get("profile_photo")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+
+        # ---------------------------------------------
+        # Update basic worker information
+        # ---------------------------------------------
+        cursor.execute("""
+            UPDATE workers
+            SET
+                employee_id=%s,
+                full_name=%s,
+                email=%s,
+                mobile_number=%s
+            WHERE worker_id=%s
+        """, (
+            employee_id,
+            full_name,
+            email,
+            mobile_number,
+            current_worker["worker_id"]
+        ))
+
+        # ---------------------------------------------
+        # Save profile photo if a new one was selected
+        # ---------------------------------------------
+        if profile_photo:
+
+            import os
+            from werkzeug.utils import secure_filename
+
+            upload_folder = os.path.join(
+                "uploads",
+                "worker_profiles"
+            )
+
+            os.makedirs(upload_folder, exist_ok=True)
+
+            original_name = secure_filename(
+                profile_photo.filename
+            )
+
+            extension = os.path.splitext(
+                original_name
+            )[1]
+
+            filename = (
+                f"worker_{current_worker['worker_id']}"
+                f"{extension}"
+            )
+
+            file_path = os.path.join(
+                upload_folder,
+                filename
+            )
+
+            profile_photo.save(file_path)
+
+            # Store path in database
+            photo_path = file_path.replace("\\", "/")
+
+            cursor.execute("""
+                UPDATE workers
+                SET profile_photo=%s
+                WHERE worker_id=%s
+            """, (
+                photo_path,
+                current_worker["worker_id"]
+            ))
+
+        # ---------------------------------------------
+        # Commit changes
+        # ---------------------------------------------
+        conn.commit()
+
+        # ---------------------------------------------
+        # Get updated worker profile
+        # ---------------------------------------------
+        cursor.execute("""
+            SELECT
+                worker_id,
+                employee_id,
+                full_name,
+                email,
+                mobile_number,
+                crew_name,
+                average_rating,
+                status,
+                zone_id,
+                profile_photo,
+                created_at
+            FROM workers
+            WHERE worker_id=%s
+        """, (
+            current_worker["worker_id"],
+        ))
+
+        worker = cursor.fetchone()
+
+        return jsonify({
+            "message": "Worker profile updated successfully",
+            "worker": worker
+        }), 200
+
+    except Exception as e:
+
+        conn.rollback()
+
+        print("Worker profile update error:", e)
+
+        return jsonify({
+            "message": "Failed to update worker profile"
+        }), 500
+
+    finally:
+
+        cursor.close()
+        conn.close()
 
 
 # ----------------------------------------------------
@@ -582,3 +729,63 @@ def complete_complaint(current_worker):
     return jsonify({
         "message": "Complaint marked as completed."
     })
+    
+# ----------------------------------------------------
+# Change Worker Password
+# ----------------------------------------------------
+@worker_bp.route("/change-password", methods=["PUT"])
+@token_required
+def change_worker_password(current_worker):
+
+    if current_worker["role"] != "Worker":
+        return jsonify({"message": "Access denied"}), 403
+
+    data = request.get_json()
+
+    new_password = data.get("new_password")
+    confirm_password = data.get("confirm_password")
+
+    if not new_password or not confirm_password:
+        return jsonify({
+            "message": "Password fields are required"
+        }), 400
+
+    if new_password != confirm_password:
+        return jsonify({
+            "message": "Passwords do not match"
+        }), 400
+
+    hashed_password = bcrypt.hashpw(
+        new_password.encode(),
+        bcrypt.gensalt()
+    ).decode()
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE workers
+            SET password = %s,
+                must_change_password = FALSE
+            WHERE worker_id = %s
+        """, (
+            hashed_password,
+            current_worker["worker_id"]
+        ))
+
+        conn.commit()
+
+        return jsonify({
+            "message": "Password changed successfully"
+        }), 200
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({
+            "message": str(e)
+        }), 500
+
+    finally:
+        cursor.close()
+        conn.close()    

@@ -4,6 +4,7 @@ from database import get_db_connection
 from werkzeug.utils import secure_filename
 import os
 import uuid
+import bcrypt
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -936,6 +937,11 @@ def change_admin_password(current_admin):
 
     if new_password != confirm_password:
         return jsonify({"message": "Passwords do not match"}), 400
+    
+    hashed_password = bcrypt.hashpw(
+         new_password.encode(),
+         bcrypt.gensalt()
+    ).decode()     
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -947,7 +953,7 @@ def change_admin_password(current_admin):
                 must_change_password = FALSE
             WHERE admin_id = %s
         """, (
-            new_password,
+            hashed_password,
             current_admin["admin_id"]
         ))
 

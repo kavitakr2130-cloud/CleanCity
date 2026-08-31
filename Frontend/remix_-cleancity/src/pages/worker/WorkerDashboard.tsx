@@ -128,22 +128,13 @@ loadDashboard();
 
 {/* Worker Profile */}
 
-<div className="bg-white rounded-2xl shadow-sm p-6 mt-8">
+<div className="bg-white rounded-2xl shadow-sm p-5 sm:p-6 mt-6 sm:mt-8">
 
-  <div className="flex justify-between items-center">
+  <div className="flex items-center">
 
-    <div className="flex items-center gap-5">
+    <div className="flex items-center gap-4 sm:gap-5">
 
-     <img
-  src={
-    worker?.profile_photo
-      ? `http://127.0.0.1:5000/${worker.profile_photo}`
-      : "https://ui-avatars.com/api/?name=" +
-        encodeURIComponent(worker?.full_name || "Worker")
-  }
-        alt=""
-        className="w-20 h-20 rounded-full object-cover border"
-      />
+    
 
       <div>
 
@@ -155,9 +146,7 @@ loadDashboard();
   Employee ID : {worker?.employee_id ?? "--"}
 </p>
 
-<p className="text-sm text-slate-500">
-  Crew : {worker?.crew_name ?? "--"}
-</p>
+
 
 <p
   className={`text-sm font-semibold mt-2 ${
@@ -179,7 +168,7 @@ loadDashboard();
 
 {/* KPI */}
 
-<div className="grid grid-cols-3 gap-4 mt-6">
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
 
   {/* Total Tasks */}
   <div className="bg-white rounded-xl shadow-sm p-5">
@@ -225,11 +214,11 @@ loadDashboard();
 </div>
 {/* Main Section */}
 
-<div className="grid grid-cols-12 gap-6 mt-8">
+<div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8">
 
   {/* Left Side */}
 
-  <div className="col-span-4">
+  <div className="col-span-1 lg:col-span-4">
 
     <div className="bg-white rounded-2xl shadow-sm p-5">
 
@@ -322,34 +311,27 @@ loadDashboard();
   ))}
 
 </div>
-
       ) : (
 
         <div className="space-y-3">
-
   {(showResolved
   ? completedHistory.filter((item: any) => item.status === "Resolved")
   : showCompleted
   ? completedHistory.filter((item: any) => item.status === "Verification")
   : complaints
 ).map((item: any) => (
-
             <div
               key={item.complaint_id}
               onClick={() => setSelectedComplaint(item)}
               className={`cursor-pointer rounded-xl border p-4 transition-all
-
               ${
                 selectedComplaint?.complaint_id === item.complaint_id
                   ? "border-green-600 bg-green-50"
                   : "border-slate-200 hover:bg-slate-50"
               }`}
             >
-
               <div className="flex justify-between items-center">
-
               <div className="flex items-center gap-2">
-
   <div
     className={`w-3 h-3 rounded-full ${
       item.status === "In Progress"
@@ -357,13 +339,10 @@ loadDashboard();
         : "bg-blue-600"
     }`}
   ></div>
-
   <span className="font-semibold">
     {item.complaint_code}
   </span>
-
 </div>
-
              <span
   className={`text-xs px-2 py-1 rounded-full ${
     showCompleted
@@ -379,47 +358,29 @@ loadDashboard();
 >
   {showCompleted ? item.status : item.priority}
 </span>
-
               </div>
-
               <p className="text-sm text-slate-500 mt-2">
                 {item.category}
               </p>
-
               <p className="text-xs text-slate-400 mt-1">
                 {item.address}
               </p>
-
             </div>
-
           ))}
-
         </div>
-
       )}
-
     </div>
-
   </div>
-
   {/* Right Side */}
-
-<div className="col-span-8">
-
+<div className="col-span-1 lg:col-span-8">
   <div className="bg-white rounded-2xl shadow-sm p-6">
-
     {selectedComplaint ? (
-
 <div>
-
-<div className="grid grid-cols-2 gap-6">
-
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
   <div>
-
     <p className="text-sm font-semibold text-slate-600 mb-2">
       Before Cleaning
     </p>
-
     <img
       src={
         selectedComplaint.image_before
@@ -428,15 +389,11 @@ loadDashboard();
       }
       className="w-full h-64 rounded-xl object-cover"
     />
-
   </div>
-
   <div>
-
     <p className="text-sm font-semibold text-slate-600 mb-2">
       After Cleaning
     </p>
-
     <img
       src={
         afterImage
@@ -447,33 +404,25 @@ loadDashboard();
       }
       className="w-full h-64 rounded-xl object-cover"
     />
-
   </div>
-
 </div>
-
-<div className="grid grid-cols-2 gap-6 mt-6">
-
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
   <div>
     <p className="text-sm text-slate-500">Complaint Code</p>
     <p className="font-semibold">{selectedComplaint.complaint_code}</p>
   </div>
-
   <div>
     <p className="text-sm text-slate-500">Status</p>
     <p className="font-semibold text-blue-600">
       {selectedComplaint.status}
     </p>
   </div>
-
   <div>
     <p className="text-sm text-slate-500">Category</p>
     <p className="font-semibold">
       {selectedComplaint.category}
     </p>
   </div>
-
- 
   <div>
   <p className="text-sm text-slate-500">
     Vehicle Number
@@ -498,23 +447,15 @@ loadDashboard();
   <p className="text-sm text-slate-500">Address</p>
   <p>{selectedComplaint.address}</p>
 </div>
-
- 
-
   <div className="col-span-2">
     <p className="text-sm text-slate-500">Description</p>
     <p>{selectedComplaint.description}</p>
   </div>
-
 </div>
-
-
 <div className="flex flex-wrap gap-4 mt-8">
-
 {!showCompleted && (
   selectedComplaint.status === "Assigned" ? (
-
- <div className="bg-orange-100 text-orange-700 px-6 py-3 rounded-xl font-semibold text-center">
+ <div className="w-full sm:w-auto bg-orange-100 text-orange-700 px-6 py-3 rounded-xl font-semibold text-center">
   Awaiting Dispatch
 </div>
 
@@ -522,7 +463,7 @@ loadDashboard();
 
   <button
     disabled
-    className="bg-orange-500 text-white px-6 py-3 rounded-xl cursor-not-allowed"
+   className="w-full sm:w-auto bg-orange-500 text-white px-6 py-3 rounded-xl cursor-not-allowed"
   >
     In Progress
   </button>
@@ -531,7 +472,7 @@ loadDashboard();
 
   <button
     disabled
-    className="bg-yellow-500 text-white px-6 py-3 rounded-xl cursor-not-allowed"
+   className="w-full sm:w-auto bg-yellow-500 text-white px-6 py-3 rounded-xl cursor-not-allowed"
   >
     Awaiting Verification
   </button>
@@ -540,22 +481,15 @@ loadDashboard();
 
   <button
     disabled
-    className="bg-green-600 text-white px-6 py-3 rounded-xl cursor-not-allowed"
+    className="w-full sm:w-auto bg-green-600 text-white px-6 py-3 rounded-xl cursor-not-allowed"
   >
     Resolved
   </button>
 )
-
 )}
-
-
-
 {!showCompleted && (
-
-<label className="bg-purple-600 text-white px-6 py-3 rounded-xl cursor-pointer">
-
+<label className="w-full sm:w-auto bg-purple-600 text-white px-6 py-3 rounded-xl cursor-pointer">
   Upload After
-
   <input
     type="file"
     hidden
@@ -568,22 +502,19 @@ loadDashboard();
       )
     }
   />
-
 </label>
-
 )}
 
 {!showCompleted && (
 
 <button
   onClick={handleCompleteComplaint}
-  className="bg-green-600 text-white px-6 py-3 rounded-xl"
+ className="w-full sm:w-auto bg-green-600 text-white px-6 py-3 rounded-xl"
 >
   Mark Completed
 </button>
 
 )}
-
 </div>
 
 </div>
@@ -593,20 +524,11 @@ loadDashboard();
   <p className="text-slate-500">
     Select a complaint.
   </p>
-
 )}
-
 </div>
-
 </div>
-
 </div>
-
 </div>
-
 );
-
 };
-
 export default WorkerDashboard;
-

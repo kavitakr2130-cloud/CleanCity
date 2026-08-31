@@ -37,6 +37,46 @@ export const verifyOtp = async (
 };
 
 // ---------------------------
+// Google Login
+// ---------------------------
+
+export const googleLogin = async (credential: string) => {
+  const response = await fetch(`${BASE_URL}/auth/google-login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      credential,
+    }),
+  });
+
+  return response.json();
+};
+
+export const completeGoogleRegistration = async (
+  email: string,
+  full_name: string,
+  mobile_number: string,
+  dob: string
+) => {
+  const response = await fetch(`${BASE_URL}/auth/google-register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      full_name,
+      mobile_number,
+      dob,
+    }),
+  });
+
+  return response.json();
+};
+
+// ---------------------------
 // Admin Login
 // ---------------------------
 

@@ -67,26 +67,7 @@ export const Settings: React.FC = () => {
         </div>
       </div>
 
-      {/* Profile summary banner */}
-      <section className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full overflow-hidden border border-slate-100 flex-shrink-0">
-            <img src={user.avatar} alt="User Avatar" className="w-full h-full object-cover" />
-          </div>
-          <div>
-            <h3 className="text-xs font-black text-slate-800">{user.name}</h3>
-            {currentRole === 'admin' ? (
-              <p className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider">
-                {authoritySubRole === 'Admin' ? 'Central Admin Dispatcher' : authoritySubRole === 'Supervisor' ? 'Zone Supervisor' : 'Field crew leader'} • Secure Access
-              </p>
-            ) : null}
-             
-          </div>
-        </div>
-        <div className="p-2 bg-emerald-50 rounded-xl text-emerald-700">
-          <UserCheck className="w-4 h-4" />
-        </div>
-      </section>
+    
 
       {/* Language Section */}
       <section className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
