@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Map, FileText, Award, Bell, ArrowLeft, Menu, LogOut, Users, Truck, BarChart2, Settings, Search, Globe, CheckCircle, MessageSquare, Camera, User, HelpCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useApp, languageOptions } from '../context/AppContext';
 import { Logo } from './Logo';
-import { getNotifications } from "../services/api";
+import { getNotifications, getProfile } from "../services/api";
 import {
   getAdminNotifications,
   
@@ -24,8 +24,27 @@ export const CitizenLayout: React.FC<{ children: React.ReactNode }> = ({ childre
 } = useApp();
 const [notifications, setNotifications] = useState<any[]>([]);
 
+
   const location = useLocation();
   const navigate = useNavigate();
+React.useEffect(() => {
+  const loadNotifications = async () => {
+    try {
+      const data = await getNotifications();
+
+      if (data.notifications) {
+        setNotifications(data.notifications);
+      }
+    } catch (err) {
+      console.error("Failed to load notifications", err);
+    }
+  };
+
+  if (user) {
+    loadNotifications();
+  }
+}, [user, location.pathname]);
+
 React.useEffect(() => {
   const loadNotifications = async () => {
     try {
@@ -90,7 +109,7 @@ console.log("Notifications:", notifications);
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="w-10 h-10 rounded-full overflow-hidden border-2 border-emerald-600 focus:outline-none cursor-pointer"
               >
-                <img className="w-full h-full object-cover" src={user.avatar} alt="User" />
+               <img className="w-full h-full object-cover" src={user.avatar} alt="User" />
               </button>
               {showDropdown && (
                 <div className="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50">
@@ -278,6 +297,39 @@ const [notifications, setNotifications] = useState<any[]>([]);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [supervisorPhoto, setSupervisorPhoto] = useState("");
   const [adminPhoto, setAdminPhoto] = useState("");
+  const [workerPhoto, setWorkerPhoto] = useState("");
+  React.useEffect(() => {
+  if (authoritySubRole !== "Field Worker") return;
+
+  const loadWorkerProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        "http://127.0.0.1:5000/worker/profile",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      if (data.profile_photo) {
+        setWorkerPhoto(
+          `http://127.0.0.1:5000/${data.profile_photo.replace(/\\/g, "/")}`
+        );
+      }
+    } catch (error) {
+      console.error("Error loading worker profile:", error);
+    }
+  };
+
+  loadWorkerProfile();
+}, [authoritySubRole]);
   React.useEffect(() => {
   if (authoritySubRole !== "Supervisor") return;
 
@@ -358,6 +410,7 @@ React.useEffect(() => {
   return [
     { label: 'Zone Dashboard', path: '/supervisor/dashboard', icon: Home },
     { label: 'Zone Complaints', path: '/supervisor/complaints', icon: FileText },
+    { label: 'Settings', path: '/supervisor/settings', icon: Settings },
 
     // Temporarily hidden until these pages are completed
     // { label: 'GIS Hotspots Map', path: '/supervisor/map', icon: Map },
@@ -401,7 +454,7 @@ avatar: supervisorPhoto || 'https://images.unsplash.com/photo-1519085360753-af01
           subtitle: 'Sanitation Worker',
           name: 'Crew Leader Amit',
           roleLabel: 'Field Crew #4 (Idle)',
-          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+          avatar: workerPhoto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
         };
       case 'Admin':
       default:

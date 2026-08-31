@@ -187,10 +187,10 @@ setSaveSuccess(true);
 };
 
  return (
-  <div className="space-y-6 min-h-[calc(100vh-140px)] flex flex-col justify-center pb-10">
+  <div className="w-full max-w-5xl mx-auto px-6 lg:px-8 py-12">
         
     {/* Breadcrumb Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-100 max-w-6xl mx-auto w-full">
+<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-100 w-full">
           <div>
             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
              <span 
@@ -227,7 +227,7 @@ setSaveSuccess(true);
         )}
 
         {/* Profile Card & Info Form */}
-       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start max-w-6xl mx-auto">
+       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start w-full">
           
           {/* Left Column: Summary Avatar & Status Card */}
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center space-y-6">

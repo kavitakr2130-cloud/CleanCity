@@ -7,12 +7,15 @@ import { mockAuthorityUsers } from '../data/mockData';
 import {
   sendOtp,
   verifyOtp,
+  googleLogin,
+  completeGoogleRegistration,
   adminLogin,
   supervisorLogin,
 } from "../services/api";
+import { GoogleLogin } from '@react-oauth/google';
 
 export const Login: React.FC = () => {
-  const { loginUser, setRole, currentRole, currentLanguage, setAuthoritySubRole, t, isLoggedIn, checkUserExistsByPhone, checkAuthorityUserExists } = useApp();
+  const { loginUser, setRole, setIsLoggedIn, currentRole, currentLanguage, setAuthoritySubRole, t, isLoggedIn, checkUserExistsByPhone, checkAuthorityUserExists } = useApp();
   const navigate = useNavigate();
 
 // Auto redirect if already logged in
@@ -42,16 +45,18 @@ const subRole = localStorage.getItem("cleancity_authority_subrole");
  */
 
   // Mode toggles
-  const [loginMethod, setLoginMethod] = useState<'password' | 'otp'>(() => {
-    const savedRole = localStorage.getItem('cleancity_role') || 'citizen';
-    return savedRole === 'citizen' ? 'otp' : 'password';
-  });
+ const [loginMethod, setLoginMethod] = useState<'password' | 'otp'>('password');
   const [usernameInput, setUsernameInput] = useState(() => {
     return localStorage.getItem('cleancity_remembered_user') || '';
   });
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(() => localStorage.getItem('cleancity_remember_me') === 'true');
   const [showPassword, setShowPassword] = useState(false);
+
+  const [googleNewUser, setGoogleNewUser] = useState(false);
+  const [googleEmail, setGoogleEmail] = useState('');
+  const [googleDob, setGoogleDob] = useState('');
+  const [googleMobile, setGoogleMobile] = useState('');
 
   // OTP flow states
   const [otpSent, setOtpSent] = useState(false);
@@ -98,6 +103,34 @@ const subRole = localStorage.getItem("cleancity_authority_subrole");
   // Handle standard password-based login
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (currentRole === 'citizen') {
+  if (!usernameInput.trim()) {
+    setError('Please enter your email address.');
+    return;
+  }
+
+  setIsLoading(true);
+  setError('');
+
+  try {
+    const success = await loginUser(usernameInput.trim(), undefined, rememberMe);
+
+    if (success) {
+      setSuccessToast('Signed in successfully!');
+      navigate('/home', { replace: true });
+    } else {
+        setGoogleNewUser(true);
+        setGoogleEmail(usernameInput.trim());
+    }
+  } catch (error) {
+    console.error(error);
+    setError('Unable to sign in.');
+  } finally {
+    setIsLoading(false);
+  }
+
+  return;
+}
     if (!usernameInput.trim()) {
       setError('Please enter your email or mobile number.');
       return;
@@ -221,7 +254,9 @@ const success = await loginUser(usernameInput, password, rememberMe);
     }
   };
 
+  
   // Handle requesting an OTP
+  /*
  const handleRequestOtp = async (e: React.FormEvent) => {
 
   e.preventDefault();
@@ -253,8 +288,11 @@ const success = await loginUser(usernameInput, password, rememberMe);
 
   }
 };
+*/
+
 
   // Handle verifying OTP
+  /*
  const handleVerifyOtp = async (e: React.FormEvent) => {
 
   e.preventDefault();
@@ -300,7 +338,7 @@ const success = await loginUser(usernameInput, password, rememberMe);
   }
 
 };
-
+*/
   const handleForgotPasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!resetEmail.trim()) {
@@ -463,94 +501,181 @@ const success = await loginUser(usernameInput, password, rememberMe);
               </div>
             )}
             
-            {/* FORM CONDITIONAL PATHS */}
-            {loginMethod === 'otp' && otpSent ? (
-              /* OTP VERIFICATION FORM */
-              <form onSubmit={handleVerifyOtp} className="space-y-5">
-                <div className="space-y-1 text-center">
-                  <h4 className="font-extrabold text-sm text-slate-700">Enter 6-Digit OTP</h4>
-                  <p className="text-[11px] text-slate-400">Simulated SMS sent to {usernameInput}</p>
-                </div>
-                <div className="relative flex items-center border border-slate-200 focus-within:border-emerald-600 transition-all rounded-2xl bg-slate-50 overflow-hidden">
-                  <input
-                    type="text"
-                    maxLength={6}
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    placeholder="------"
-                    className="w-full text-center py-4 bg-transparent text-lg font-black tracking-widest focus:outline-none text-slate-800"/>
-                </div>
-                <div className="flex justify-between items-center text-[10px] text-slate-400 font-extrabold px-1">
-                  <span>Code Sent</span>
-                  {countdown > 0 ? (
-                    <span className="text-emerald-600">Resend in {countdown}s</span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleRequestOtp}
-                      className="text-emerald-600 hover:underline cursor-pointer"
-                    >
-                      Resend SMS
-                    </button>
-                  )}
-                </div>
+{/* FORM CONDITIONAL PATHS */}
+{googleNewUser ? (
+  <form className="space-y-4">
+    <div className="text-center">
+      <h4 className="font-extrabold text-sm text-slate-700">
+        Complete Your Registration
+      </h4>
+      <p className="text-[11px] text-slate-400">
+        Please enter your mobile number and date of birth.
+      </p>
+    </div>
 
-                {/* Remember Me Toggle on OTP Code step */}
-                <div className="flex items-center justify-between px-1 py-1">
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer"
-                    />
-                    <span className="text-xs font-bold text-slate-400">Remember Me</span>
-                  </label>
-                </div>
+    <input
+      type="tel"
+      value={googleMobile}
+      onChange={(e) => setGoogleMobile(e.target.value)}
+      placeholder="Mobile Number"
+      maxLength={10}
+      required
+      className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:border-emerald-600"
+    />
 
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-4 rounded-xl shadow-lg transition-all active:scale-98 cursor-pointer"
-                >
-                  {isLoading ? 'Verifying...' : 'Verify OTP & Sign In'}
-                </button>
+    <input
+      type="date"
+      value={googleDob}
+      onChange={(e) => setGoogleDob(e.target.value)}
+      required
+      className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:border-emerald-600"
+    />
 
-                <button
-                  type="button"
-                  onClick={() => setOtpSent(false)}
-                  className="w-full text-[11px] font-black text-slate-400 hover:text-slate-600 text-center block cursor-pointer"
-                >
-                  Change Mobile Number
-                </button>
-              </form>
+   <button
+  type="button"
+  disabled={isLoading}
+  onClick={async () => {
+    if (!googleMobile.trim()) {
+      setError("Please enter your mobile number.");
+      return;
+    }
+
+    if (!googleDob) {
+      setError("Please select your date of birth.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const data = await completeGoogleRegistration(
+        googleEmail,
+        "Citizen",
+        googleMobile,
+        googleDob
+      );
+
+      console.log("Google registration response:", data);
+
+     if (data.token) {
+  localStorage.setItem("token", data.token);
+  localStorage.setItem("user", JSON.stringify(data.user));
+
+  const success = await loginUser(
+    googleMobile,
+    undefined,
+    true
+  );
+
+  if (success) {
+    setSuccessToast("Registration successful!");
+    navigate("/home", { replace: true });
+  } else {
+    setError("Registration succeeded, but login could not be completed.");
+  }
+} else {
+        setError(data.message || "Registration failed.");
+      }
+    } catch (error) {
+      console.error(error);
+      setError("Google registration failed.");
+    } finally {
+      setIsLoading(false);
+    }
+  }}
+  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-4 rounded-xl"
+>
+  {isLoading ? "Creating Account..." : "Complete Registration"}
+</button>
+  </form>
+// ) : loginMethod === 'otp' && otpSent ? (
+//               /* OTP VERIFICATION FORM */
+//               <form onSubmit={handleVerifyOtp} className="space-y-5">
+//                 <div className="space-y-1 text-center">
+//                   <h4 className="font-extrabold text-sm text-slate-700">Enter 6-Digit OTP</h4>
+//                   <p className="text-[11px] text-slate-400">Simulated SMS sent to {usernameInput}</p>
+//                 </div>
+//                 <div className="relative flex items-center border border-slate-200 focus-within:border-emerald-600 transition-all rounded-2xl bg-slate-50 overflow-hidden">
+//                   <input
+//                     type="text"
+//                     maxLength={6}
+//                     value={otp}
+//                     onChange={(e) => setOtp(e.target.value)}
+//                     placeholder="------"
+//                     className="w-full text-center py-4 bg-transparent text-lg font-black tracking-widest focus:outline-none text-slate-800"/>
+//                 </div>
+//                 <div className="flex justify-between items-center text-[10px] text-slate-400 font-extrabold px-1">
+//                   <span>Code Sent</span>
+//                   {countdown > 0 ? (
+//                     <span className="text-emerald-600">Resend in {countdown}s</span>
+//                   ) : (
+//                     <button
+//                       type="button"
+//                       onClick={handleRequestOtp}
+//                       className="text-emerald-600 hover:underline cursor-pointer"
+//                     >
+//                       Resend SMS
+//                     </button>
+//                   )}
+//                 </div>
+
+//                 {/* Remember Me Toggle on OTP Code step */}
+//                 <div className="flex items-center justify-between px-1 py-1">
+//                   <label className="flex items-center gap-2 cursor-pointer select-none">
+//                     <input
+//                       type="checkbox"
+//                       checked={rememberMe}
+//                       onChange={(e) => setRememberMe(e.target.checked)}
+//                       className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer"
+//                     />
+//                     <span className="text-xs font-bold text-slate-400">Remember Me</span>
+//                   </label>
+//                 </div>
+
+//                 <button
+//                   type="submit"
+//                   disabled={isLoading}
+//                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-4 rounded-xl shadow-lg transition-all active:scale-98 cursor-pointer"
+//                 >
+//                   {isLoading ? 'Verifying...' : 'Verify OTP & Sign In'}
+//                 </button>
+
+//                 <button
+//                   type="button"
+//                   onClick={() => setOtpSent(false)}
+//                   className="w-full text-[11px] font-black text-slate-400 hover:text-slate-600 text-center block cursor-pointer"
+//                 >
+//                   Change Mobile Number
+//                 </button>
+//               </form>
             ) : (
               /* STANDARD PASSWORD OR EMAIL LOGIN FORM */
-              <form onSubmit={loginMethod === 'otp' ? handleRequestOtp : handlePasswordLogin} className="space-y-4">
+                 <form onSubmit={handlePasswordLogin} className="space-y-4">
                 {/* Username/Email/Phone Input */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block ml-1">
-                    {currentRole === 'admin' ? 'Employee ID or Email' : 'Mobile Number'}
+                   {currentRole === 'admin' ? 'Employee ID or Email' : 'Email Address'}
                   </label>
                   <div className="relative flex items-center border border-slate-200 focus-within:border-emerald-600 rounded-2xl bg-slate-50 overflow-hidden px-4">
-                    {currentRole === 'citizen' ? (
-                      <Phone className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                   {currentRole === 'citizen' ? (
+                      <Mail className="w-4 h-4 text-slate-400 flex-shrink-0" />
                     ) : (
                       <User className="w-4 h-4 text-slate-400 flex-shrink-0" />
                     )}
-                    <input
-                      type="text"
+                   <input
+                      type={currentRole === 'citizen' ? 'email' : 'text'}
                       required
                       value={usernameInput}
                       onChange={(e) => setUsernameInput(e.target.value)}
-                      placeholder={currentRole === 'admin' ? 'admin@cleancity.gov' : 'e.g. 9876543210'}
+                      placeholder={currentRole === 'admin' ? 'admin@cleancity.gov' : 'name@example.com'}
                       className="w-full px-3 py-3 bg-transparent text-xs font-semibold focus:outline-none text-slate-800"
                     />
                   </div>
                 </div>
 
                 {/* Password Input (Hidden if OTP Mode selected) */}
-                {loginMethod === 'password' && (
+                {currentRole !== 'citizen' && (
                   <div className="space-y-1">
                     <div className="flex justify-between items-center px-1">
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
@@ -608,11 +733,57 @@ const success = await loginUser(usernameInput, password, rememberMe);
                     currentRole === 'admin' ? 'bg-slate-800 hover:bg-slate-900 shadow-slate-900/10' : 'shadow-emerald-600/10'
                   }`}
                 >
-                  {isLoading ? 'Processing...' : loginMethod === 'otp' ? 'Send OTP Code' : `Sign In`}
+                  {isLoading ? 'Processing...' : 'Sign In'}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
             )}
+
+          {/* GOOGLE LOGIN - CITIZEN ONLY */}
+          {currentRole === 'citizen' && (
+            <div className="mt-4">
+              <GoogleLogin
+  onSuccess={async (credentialResponse) => {
+    if (!credentialResponse.credential) {
+      setError("Google login failed.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      const data = await googleLogin(credentialResponse.credential);
+
+      console.log("Google backend response:", data);
+
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        setIsLoggedIn(true);
+        setRole("citizen");
+
+        navigate("/home");
+      } else {
+        console.log("New Google user:", data);
+
+        setGoogleNewUser(true);
+        setGoogleEmail(data.email);
+      }
+    } catch (error) {
+      console.error(error);
+      setError("Google login failed.");
+    } finally {
+      setIsLoading(false);
+    }
+  }}
+  onError={() => {
+    setError("Google Login Failed");
+  }}
+/>
+            </div>
+          )}
+
           </div>
         )}
 

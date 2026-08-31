@@ -230,6 +230,7 @@ const handleSave = async () => {
   editPhone,
   profilePhotoFile
 );
+console.log("UPDATED PROFILE RESPONSE:", response);
 
     updateUserProfile(
       editName,

@@ -18,6 +18,8 @@ class Config:
 
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
     
+    GOOGLE_CLIENT_ID = os.getenv("OAUTH_CLIENT_ID")
+    
     TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
     TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
     TWILIO_VERIFY_SERVICE_SID = os.getenv("TWILIO_VERIFY_SERVICE_SID")

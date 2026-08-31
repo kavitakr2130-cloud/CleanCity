@@ -850,3 +850,61 @@ def get_notifications(current_supervisor):
     return jsonify({
         "notifications": notifications
     })
+    
+# ----------------------------------------------------
+# Change Supervisor Password
+# ----------------------------------------------------
+@supervisor_bp.route("/change-password", methods=["PUT"])
+@token_required
+def change_supervisor_password(current_supervisor):
+
+    data = request.get_json()
+
+    new_password = data.get("new_password")
+    confirm_password = data.get("confirm_password")
+
+    if not new_password or not confirm_password:
+        return jsonify({
+            "message": "Both password fields are required"
+        }), 400
+
+    if new_password != confirm_password:
+        return jsonify({
+            "message": "Passwords do not match"
+        }), 400
+
+    hashed_password = bcrypt.hashpw(
+        new_password.encode(),
+        bcrypt.gensalt()
+    ).decode()
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE supervisors
+            SET password = %s,
+                must_change_password = FALSE
+            WHERE supervisor_id = %s
+        """, (
+            hashed_password,
+            current_supervisor["supervisor_id"]
+        ))
+
+        conn.commit()
+
+        return jsonify({
+            "message": "Password changed successfully"
+        }), 200
+
+    except Exception as e:
+        conn.rollback()
+
+        return jsonify({
+            "message": str(e)
+        }), 500
+
+    finally:
+        cursor.close()
+        conn.close()    

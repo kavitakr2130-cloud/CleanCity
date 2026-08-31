@@ -6,6 +6,8 @@ import {
   adminLogin,
   supervisorLogin,
   workerLogin,
+  getProfile,
+  BASE_URL,
 } from "../services/api";
 import { submitFeedback } from "../services/api";
 
@@ -477,6 +479,7 @@ interface AppContextType {
   authoritySubRole: 'Admin' | 'Supervisor' | 'Field Worker';
   setAuthoritySubRole: (subrole: 'Admin' | 'Supervisor' | 'Field Worker') => void;
   isLoggedIn: boolean;
+  setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
   setRole: (role: 'citizen' | 'admin' | 'supervisor' | 'worker') => void;
   loginUser: (phoneOrEmail: string, password?: string, remember?: boolean) => Promise<boolean>;
   registerUser: (name: string, phone: string, email: string, password?: string, remember?: boolean) => Promise<boolean>;
@@ -872,26 +875,40 @@ setIsLoggedIn(true);
 
         }
 
-        else {
-          const newCitizen: Citizen = {
-            id: `CITIZEN_${Math.floor(10000 + Math.random() * 90000)}`,
-            name: phoneOrEmail,
-            phoneNumber: phoneOrEmail,
-            email: "",
-            password: password || "",
-            cleanPoints: 0,
-            rank: "BRONZE",
-            avatar: ""
-          };
+      else {
+  try {
+    const profileData = await getProfile();
+    const profile = profileData.user;
 
-         setUser(newCitizen);
-storage.setUser(newCitizen);
-setRoleState("citizen");
-setIsLoggedIn(true);
-          sessionStorage.setItem("cleancity_session_loggedin", "true");
+    const newCitizen: Citizen = {
+      id: profile.id || `CITIZEN_${Math.floor(10000 + Math.random() * 90000)}`,
+      name: profile.full_name || phoneOrEmail,
+      phoneNumber: profile.mobile_number || phoneOrEmail,
+      email: profile.email || "",
+      password: password || "",
+      cleanPoints: profile.clean_points || 0,
+      rank: "BRONZE",
+      avatar: profile.profile_photo
+        ? `${BASE_URL}/${profile.profile_photo.replace(/\\/g, "/")}`
+        : ""
+    };
 
-          resolve(true);
-        }
+    setUser(newCitizen);
+    storage.setUser(newCitizen);
+    setRoleState("citizen");
+    setIsLoggedIn(true);
+
+    sessionStorage.setItem(
+      "cleancity_session_loggedin",
+      "true"
+    );
+
+    resolve(true);
+  } catch (error) {
+    console.error("Failed to load citizen profile:", error);
+    resolve(false);
+  }
+}
         
       }, 800);
     });
@@ -952,6 +969,7 @@ console.log("Token:", localStorage.getItem("token"));
     localStorage.removeItem('cleancity_loggedin');
     localStorage.removeItem('cleancity_remember_me');
     localStorage.removeItem('cleancity_remembered_user');
+    localStorage.removeItem('cleancity_role');
     sessionStorage.removeItem('cleancity_session_loggedin');
     setUser(mockCitizen);
     storage.setUser(mockCitizen);
@@ -1515,6 +1533,7 @@ console.log("Token:", localStorage.getItem("token"));
       authoritySubRole,
       setAuthoritySubRole,
       isLoggedIn,
+      setIsLoggedIn,
       setRole,
       loginUser,
       registerUser,

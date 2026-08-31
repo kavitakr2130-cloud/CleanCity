@@ -6,9 +6,7 @@ import {
   Phone, 
   MapPin, 
   Shield, 
-  Hash, 
-  Clock, 
-  Activity, 
+  Hash,  
   Edit3, 
   Save, 
   X, 
@@ -18,10 +16,10 @@ import {
   CheckCircle,
   Briefcase
 } from 'lucide-react';
-import { AdminLayout } from '../../components/Layouts';
+
 import { useApp } from "../../context/AppContext";
 
-interface AdminProfileData {
+interface WorkerProfileData {
   avatar: string;
   name: string;
   role: string;
@@ -31,20 +29,20 @@ interface AdminProfileData {
   ward: string;
   officeLocation: string;
   lastLogin: string;
-  status: 'Active' | 'Inactive';
+  status: 'Available' | 'Busy' | 'On Leave';
 }
 
-const DEFAULT_PROFILE: AdminProfileData = {
+const DEFAULT_PROFILE: WorkerProfileData = {
   avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-  name: 'Admin Dispatcher',
-  role: 'Municipal Administrator / Dispatcher',
+  name: 'Field Worker',
+  role: 'Municipal Field Worker',
   employeeId: 'EMP-2026-0984',
   email: 'Radhika@gmail.com',
   phone: '+91 98765 43210',
-  ward: 'Ward 12 - Central Sector (Zone A)',
-  officeLocation: 'Municipal Corporation Head Office, Hall 4, Floor 3',
+  ward: 'Assigned Field Area',
+  officeLocation: 'Field Operations Office',
   lastLogin: 'July 14, 2026 • 01:45 AM',
-  status: 'Active'
+  status: 'Available',
 };
 
 const AVATAR_PRESETS = [
@@ -58,42 +56,46 @@ const AVATAR_PRESETS = [
 export const WorkerProfile: React.FC = () => {
   const navigate = useNavigate();
   const { currentRole } = useApp();
-  const [profile, setProfile] = useState<AdminProfileData>(DEFAULT_PROFILE);
+  const [profile, setProfile] = useState<WorkerProfileData>(DEFAULT_PROFILE);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<AdminProfileData>(DEFAULT_PROFILE);
+  const [editForm, setEditForm] = useState<WorkerProfileData>(DEFAULT_PROFILE);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
 
 useEffect(() => {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch("http://127.0.0.1:5000/admin/profile", {
+     const response = await fetch("http://127.0.0.1:5000/worker/profile", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
       const data = await response.json();
+      console.log("WORKER PROFILE FROM DATABASE:", data);
 
-      const adminProfile: AdminProfileData = {
-        avatar: DEFAULT_PROFILE.avatar,
+     const adminProfile: WorkerProfileData = {
+        avatar: data.profile_photo
+  ? `http://127.0.0.1:5000/${data.profile_photo.replace(/\\/g, "/")}`
+  : DEFAULT_PROFILE.avatar,
         name: data.full_name,
-        role: data.designation || "Administrator",
+        role: data.designation || "Municipal Field Worker",
         employeeId: data.employee_id,
         email: data.email,
         phone: data.mobile_number || "",
-        ward: "Municipal Corporation",
-        officeLocation: DEFAULT_PROFILE.officeLocation,
+        ward: data.ward || "Assigned Field Area",
+        officeLocation: data.office_location || DEFAULT_PROFILE.officeLocation,
         lastLogin: DEFAULT_PROFILE.lastLogin,
-        status: "Active",
+        status: "Available"
       };
 
       setProfile(adminProfile);
-      setEditForm(adminProfile);
+setEditForm(adminProfile);
     } catch (err) {
-      console.error("Error loading admin profile:", err);
+      console.error("Error loading worker profile:", err);
     }
   };
 
@@ -127,39 +129,85 @@ useEffect(() => {
     setShowAvatarPicker(false);
   };
 
- const handleSave = async (e: React.FormEvent) => {
+const handleSave = async (e: React.FormEvent) => {
   e.preventDefault();
+
+  console.log("SAVE BUTTON CLICKED");
 
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch("http://127.0.0.1:5000/admin/profile", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(editForm),
-    });
+    const formData = new FormData();
+
+    formData.append("employeeId", editForm.employeeId);
+    formData.append("name", editForm.name);
+    formData.append("email", editForm.email);
+    formData.append("phone", editForm.phone);
+
+    // Add actual selected image file
+    if (profilePhotoFile) {
+      formData.append("profile_photo", profilePhotoFile);
+    }
+
+    const response = await fetch(
+      "http://127.0.0.1:5000/worker/profile",
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }
+    );
 
     const data = await response.json();
 
+    console.log("PROFILE UPDATE RESPONSE:", data);
+
     if (!response.ok) {
-      alert(data.message);
+      alert(data.message || "Failed to update profile");
       return;
     }
 
-    setProfile(editForm);
+    // Get the updated worker returned by backend
+    const worker = data.worker;
+
+    const updatedProfile: WorkerProfileData = {
+      ...editForm,
+
+      employeeId: worker.employee_id,
+      name: worker.full_name,
+      email: worker.email,
+      phone: worker.mobile_number || "",
+
+      avatar: worker.profile_photo
+        ? `http://127.0.0.1:5000/${worker.profile_photo.replace(/\\/g, "/")}`
+        : editForm.avatar,
+
+      status: worker.status || "Available",
+    };
+
+    setProfile(updatedProfile);
+    setEditForm(updatedProfile);
+
+    setProfilePhotoFile(null);
     setIsEditing(false);
+    setShowAvatarPicker(false);
+
     setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+
+    setTimeout(() => {
+      setSaveSuccess(false);
+    }, 3000);
+
   } catch (err) {
-    console.error("Update profile error:", err);
+    console.error("Update worker profile error:", err);
+    alert("Something went wrong while updating the profile.");
   }
 };
 
   return (
-    <div className="space-y-6 max-h-full overflow-y-auto pb-10 text-left">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-10 space-y-6 pb-10 text-left">
         
         {/* Breadcrumb Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-100">
@@ -175,8 +223,8 @@ useEffect(() => {
               <ChevronRight className="w-3 h-3" />
               <span className="text-slate-600">My Profile</span>
             </div>
-            <h2 className="text-xl font-extrabold text-slate-900">Admin Profile</h2>
-            <p className="text-xs text-slate-500 font-semibold mt-0.5">Manage your administrator credentials and account information.</p>
+           <h2 className="text-xl font-extrabold text-slate-900">Worker Profile</h2>
+            <p className="text-xs text-slate-500 font-semibold mt-0.5">Manage your worker credentials and account information.</p>
           </div>
           <button 
             onClick={() => navigate(
@@ -197,57 +245,131 @@ useEffect(() => {
         {saveSuccess && (
           <div className="p-4 bg-emerald-50 border border-emerald-150 rounded-2xl flex items-center gap-3 text-emerald-800 text-xs font-bold animate-slide-up">
             <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Profile information updated successfully in local session database index. Ready for API endpoints sync.</span>
+            <span>Worker profile information updated successfully.</span>
           </div>
         )}
 
         {/* Profile Card & Info Form */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start max-w-6xl mx-auto w-full">
           
           {/* Left Column: Summary Avatar & Status Card */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center space-y-6">
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center space-y-6 w-full">
             <div className="relative group">
-              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-50 shadow-md">
+              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-slate-50 shadow-md">
                 <img 
                   src={isEditing ? editForm.avatar : profile.avatar} 
                   alt={profile.name} 
                   className="w-full h-full object-cover"
                 />
               </div>
-              {isEditing && (
-                <button
-                  type="button"
-                  onClick={() => setShowAvatarPicker(!showAvatarPicker)}
-                  className="absolute bottom-1 right-1 p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg transition-transform hover:scale-105 cursor-pointer"
-                  title="Choose Avatar"
-                >
-                  <Camera className="w-4 h-4" />
-                </button>
-              )}
+            {isEditing && (
+  <label
+    className="absolute bottom-1 right-1 p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg transition-transform hover:scale-105 cursor-pointer"
+    title="Choose Profile Photo"
+  >
+    <Camera className="w-4 h-4" />
+
+    <input
+      type="file"
+      accept="image/*"
+      className="hidden"
+      onChange={(e) => {
+        const file = e.target.files?.[0];
+
+        if (!file) return;
+
+        setProfilePhotoFile(file);
+
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+          const result = event.target?.result;
+
+          if (typeof result === "string") {
+            setEditForm(prev => ({
+              ...prev,
+              avatar: result
+            }));
+          }
+        };
+
+        reader.readAsDataURL(file);
+      }}
+    />
+  </label>
+)}
             </div>
 
-            {showAvatarPicker && isEditing && (
-              <div className="w-full border-t border-slate-100 pt-4 space-y-3">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select Preset Avatar</p>
-                <div className="flex justify-center gap-2">
-                  {AVATAR_PRESETS.map((url, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => handlePresetSelect(url)}
-                      className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-all hover:scale-105 cursor-pointer ${
-                        editForm.avatar === url ? 'border-emerald-500 scale-105' : 'border-transparent'
-                      }`}
-                    >
-                      <img src={url} alt={`preset ${i}`} className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-                <div className="text-[9px] text-slate-400 font-semibold">Or input any URL directly in the profile settings form.</div>
-              </div>
-            )}
+           {showAvatarPicker && isEditing && (
+  <div className="w-full border-t border-slate-100 pt-4 space-y-3">
+    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+      Select Profile Photo
+    </p>
 
-            <div className="space-y-1">
+    {/* Upload from Computer */}
+    <div className="flex justify-center">
+      <label className="cursor-pointer flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-[10px] font-bold text-slate-700">
+        Upload from Computer
+
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+
+            if (!file) return;
+
+            setProfilePhotoFile(file);
+
+            const reader = new FileReader();
+
+            reader.onload = (event) => {
+              const result = event.target?.result;
+
+              if (typeof result === "string") {
+                setEditForm(prev => ({
+                  ...prev,
+                  avatar: result
+                }));
+              }
+            };
+
+            reader.readAsDataURL(file);
+          }}
+        />
+      </label>
+    </div>
+
+    {/* Preset Avatars */}
+    <p className="text-[9px] text-slate-400 font-semibold text-center">
+      Or choose a preset avatar
+    </p>
+
+    <div className="flex justify-center gap-2">
+      {AVATAR_PRESETS.map((url, i) => (
+        <button
+          key={i}
+          type="button"
+          onClick={() => handlePresetSelect(url)}
+          className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-all hover:scale-105 cursor-pointer ${
+            editForm.avatar === url
+              ? 'border-emerald-500 scale-105'
+              : 'border-transparent'
+          }`}
+        >
+          <img
+            src={url}
+            alt={`preset ${i}`}
+            className="w-full h-full object-cover"
+          />
+        </button>
+      ))}
+    </div>
+  </div>
+)}
+
+            <div className="space-y-1 mt-2">
               <h3 className="text-base font-black text-slate-800">{profile.name}</h3>
               <p className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 inline-block">
                 {profile.role}
@@ -289,14 +411,14 @@ useEffect(() => {
           </div>
 
           {/* Right Column: Detailed Fields Profile / Edit Form */}
-          <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+          <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm w-full">
             <form onSubmit={handleSave} className="space-y-6">
               <div className="border-b border-slate-100 pb-3">
                 <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
-                  {isEditing ? 'Modify Profile Fields' : 'Official Employee Credentials'}
+                  {isEditing ? 'Modify Profile Fields' : 'Official Worker Credentials'}
                 </h3>
                 <p className="text-[10px] text-slate-400 mt-0.5">
-                  {isEditing ? 'Provide current credentials below. All fields can be synced to database controllers.' : 'These fields identify your authorization within the municipal sector.'}
+                  {isEditing ? 'Provide your current worker credentials below.' : 'These fields identify your authorization as a municipal field worker.'}
                 </p>
               </div>
 
@@ -324,11 +446,11 @@ useEffect(() => {
                   )}
                 </div>
 
-                {/* Admin Role */}
+                {/* WORKER Role */}
                 <div className="space-y-1 text-left">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
                     <Briefcase className="w-3.5 h-3.5 text-slate-400" />
-                    Admin Role
+                   Worker Role
                   </label>
                   {isEditing ? (
                     <select 
@@ -337,10 +459,10 @@ useEffect(() => {
                       onChange={handleInputChange}
                       className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 cursor-pointer"
                     >
-                      <option value="Municipal Administrator / Dispatcher">Municipal Administrator / Dispatcher</option>
-                      <option value="Municipal Administrator">Municipal Administrator</option>
-                      <option value="Zone Supervisor">Zone Supervisor</option>
-                      <option value="Field Crew Leader">Field Crew Leader</option>
+                     <option value="Field Worker">Field Worker</option>
+                     <option value="Municipal Field Worker">Municipal Field Worker</option>
+                  
+                     
                     </select>
                   ) : (
                     <p className="p-2.5 bg-slate-50/50 border border-slate-100 rounded-xl text-xs font-bold text-slate-700">
@@ -441,7 +563,7 @@ useEffect(() => {
                 <div className="md:col-span-2 space-y-1 text-left">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                    Physical Office Location
+                    Field Operations Location
                   </label>
                   {isEditing ? (
                     <input 

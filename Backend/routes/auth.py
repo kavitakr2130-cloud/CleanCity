@@ -6,6 +6,9 @@ from database import get_db_connection
 from twilio.rest import Client
 from config import Config
 
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
 import google.generativeai as genai
 
 genai.configure(api_key=Config.GEMINI_API_KEY)
@@ -373,6 +376,186 @@ def verify_otp():
         "user": user
     })
     
+# -------------------------------
+# Google Login
+# -------------------------------
+@auth_bp.route("/google-login", methods=["POST"])
+def google_login():
+
+    data = request.json
+    credential = data.get("credential")
+
+    if not credential:
+        return jsonify({
+            "message": "Google credential is required"
+        }), 400
+
+    try:
+        # Verify Google credential
+        google_user = id_token.verify_oauth2_token(
+            credential,
+            google_requests.Request(),
+            Config.GOOGLE_CLIENT_ID
+        )
+
+        google_email = google_user.get("email")
+        google_name = google_user.get("name", "Citizen")
+
+        if not google_email:
+            return jsonify({
+                "message": "Google account email not available"
+            }), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Check existing citizen by email
+        cursor.execute(
+            "SELECT * FROM users WHERE email=%s",
+            (google_email,)
+        )
+
+        user = cursor.fetchone()
+
+        # Existing user
+        if user:
+
+            token = jwt.encode(
+                {
+                    "user_id": user["user_id"],
+                    "role": "Citizen",
+                    "exp": datetime.utcnow() + timedelta(days=30)
+                },
+                Config.JWT_SECRET_KEY,
+                algorithm="HS256"
+            )
+
+            cursor.close()
+            conn.close()
+
+            return jsonify({
+                "message": "Login Successful",
+                "existing_user": True,
+                "token": token,
+                "user": user
+            })
+
+        # New user
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            "message": "New Citizen",
+            "existing_user": False,
+            "email": google_email,
+            "full_name": google_name
+        })
+
+    except ValueError:
+        return jsonify({
+            "message": "Invalid Google credential"
+        }), 401
+
+    except Exception as e:
+        return jsonify({
+            "message": "Google login failed",
+            "error": str(e)
+        }), 500    
+
+# -------------------------------
+# Complete Google Citizen Registration
+# -------------------------------
+@auth_bp.route("/google-register", methods=["POST"])
+def google_register():
+
+    data = request.json
+
+    email = data.get("email")
+    full_name = data.get("full_name", "Citizen")
+    mobile_number = data.get("mobile_number")
+    dob = data.get("dob")
+
+    if not email or not mobile_number or not dob:
+        return jsonify({
+            "message": "Email, mobile number and date of birth are required"
+        }), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Check if email already exists
+    cursor.execute(
+        "SELECT * FROM users WHERE email=%s",
+        (email,)
+    )
+
+    existing_user = cursor.fetchone()
+
+    if existing_user:
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            "message": "Google account already registered"
+        }), 409
+
+    # Check if mobile number already exists
+    cursor.execute(
+        "SELECT * FROM users WHERE mobile_number=%s",
+        (mobile_number,)
+    )
+
+    existing_mobile = cursor.fetchone()
+
+    if existing_mobile:
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            "message": "Mobile number already registered"
+        }), 409
+
+    # Create citizen
+    cursor.execute(
+        """
+        INSERT INTO users
+        (full_name, mobile_number, email, dob, is_verified)
+        VALUES (%s, %s, %s, %s, TRUE)
+        """,
+        (full_name, mobile_number, email, dob)
+    )
+
+    conn.commit()
+
+    user_id = cursor.lastrowid
+
+    cursor.execute(
+        "SELECT * FROM users WHERE user_id=%s",
+        (user_id,)
+    )
+
+    user = cursor.fetchone()
+
+    # Create JWT
+    token = jwt.encode(
+        {
+            "user_id": user["user_id"],
+            "role": "Citizen",
+            "exp": datetime.utcnow() + timedelta(days=30)
+        },
+        Config.JWT_SECRET_KEY,
+        algorithm="HS256"
+    )
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({
+        "message": "Registration Successful",
+        "existing_user": False,
+        "token": token,
+        "user": user
+    })    
 # -------------------------------
 # Gemini AI Test
 # -------------------------------
