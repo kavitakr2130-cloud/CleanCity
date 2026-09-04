@@ -550,7 +550,7 @@ CREATE TABLE `vehicles` (
 
 LOCK TABLES `vehicles` WRITE;
 /*!40000 ALTER TABLE `vehicles` DISABLE KEYS */;
-INSERT INTO `vehicles` VALUES (1,'MH12AB1001','Mini Garbage Van',1,'Ramesh Kumar','9876543311','Available',18.52040000,73.85670000,'2026-07-22 17:08:37'),(2,'MH12AB1002','Compactor Truck',1,'Suresh Patil','9876543312','Available',18.52750000,73.84780000,'2026-07-22 17:08:37'),(3,'MH12AB1003','Street Sweeper',1,'Mahesh Jadhav','9876543313','Maintenance',18.51520000,73.86240000,'2026-07-22 17:08:37'),(4,'MH12AB2001','Dump Truck',2,'Vikram Shinde','9876543314','Available',18.55900000,73.78680000,'2026-07-22 17:08:37'),(5,'MH12AB2002','Drain Cleaner',2,'Ganesh More','9876543315','Busy',18.54890000,73.80150000,'2026-07-22 17:08:37');
+INSERT INTO `vehicles` VALUES (1,'MH12AB1001','Mini Garbage Van',1,'Ramesh Kumar','9876543311','Available',18.52040000,73.85670000,'2026-07-22 17:08:37'),(2,'MH12AB1002','Compactor Truck',1,'Suresh Patil','9876543312','Busy',18.52750000,73.84780000,'2026-07-22 17:08:37'),(3,'MH12AB1003','Street Sweeper',1,'Mahesh Jadhav','9876543313','Maintenance',18.51520000,73.86240000,'2026-07-22 17:08:37'),(4,'MH12AB2001','Dump Truck',2,'Vikram Shinde','9876543314','Busy',18.55900000,73.78680000,'2026-07-22 17:08:37'),(5,'MH12AB2002','Drain Cleaner',2,'Ganesh More','9876543315','Busy',18.54890000,73.80150000,'2026-07-22 17:08:37');
 /*!40000 ALTER TABLE `vehicles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -597,7 +597,7 @@ CREATE TABLE `workers` (
 
 LOCK TABLES `workers` WRITE;
 /*!40000 ALTER TABLE `workers` DISABLE KEYS */;
-INSERT INTO `workers` VALUES (1,'WRK001','Amit Kumar','amit@cleancity.com','$2b$12$SxNkBiU5Q0sPSrLH.3mG1Oi.sBwCYtCjBr3zTFf7/GVIIx1ePiY.S','98765432221',1,1,1,'Crew A','Available',5.0,NULL,NULL,'2026-07-22 16:46:48',0,'uploads/worker_profiles/worker_1.png'),(2,'WRK002','Neha Singh','neha@cleancity.com','$2b$12$jfS6di5jm.rG.4oAv7ZS9u5b2y9S1y0CaBeuTxo4UK/WI1RUhO83O','9876543222',2,1,1,'Crew A','Busy',5.0,NULL,NULL,'2026-07-22 16:46:48',1,'uploads/worker_profiles/worker_2.png'),(3,'WRK003','Rohit Patil','rohit@cleancity.com','$2b$12$sWzFFWUTzJO9Ym5xPRwBu..GwIbjVg7bdNugKPeSe02QL52wuiU52','9876543223',4,2,2,'Crew B','Available',5.0,NULL,NULL,'2026-07-22 16:46:48',1,'uploads/worker_profiles/worker_3.jpeg'),(4,'WRK004','Sneha Joshi','sneha@cleancity.com','$2b$12$Y9.p8JA8dB6puqOcnwaTNugFFtyeo985lY/KbsnVa3TBrVTa6jtZ2','9876543224',3,2,2,'Crew B','Available',5.0,NULL,NULL,'2026-07-22 16:46:48',1,'uploads/worker_profiles/worker_4.jpeg');
+INSERT INTO `workers` VALUES (1,'WRK001','Amit Kumar','amit@cleancity.com','$2b$12$SxNkBiU5Q0sPSrLH.3mG1Oi.sBwCYtCjBr3zTFf7/GVIIx1ePiY.S','98765432221',1,1,1,'Crew A','Available',5.0,NULL,NULL,'2026-07-22 16:46:48',0,'uploads/worker_profiles/worker_1.png'),(2,'WRK002','Neha Singh','neha@cleancity.com','$2b$12$jfS6di5jm.rG.4oAv7ZS9u5b2y9S1y0CaBeuTxo4UK/WI1RUhO83O','9876543222',2,1,1,'Crew A','Available',5.0,NULL,NULL,'2026-07-22 16:46:48',1,'uploads/worker_profiles/worker_2.png'),(3,'WRK003','Rohit Patil','rohit@cleancity.com','$2b$12$sWzFFWUTzJO9Ym5xPRwBu..GwIbjVg7bdNugKPeSe02QL52wuiU52','9876543223',4,2,2,'Crew B','Available',5.0,NULL,NULL,'2026-07-22 16:46:48',1,'uploads/worker_profiles/worker_3.jpeg'),(4,'WRK004','Sneha Joshi','sneha@cleancity.com','$2b$12$Y9.p8JA8dB6puqOcnwaTNugFFtyeo985lY/KbsnVa3TBrVTa6jtZ2','9876543224',3,2,2,'Crew B','Available',5.0,NULL,NULL,'2026-07-22 16:46:48',1,'uploads/worker_profiles/worker_4.jpeg');
 /*!40000 ALTER TABLE `workers` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -639,4 +639,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-09-04 16:55:42
+-- Dump completed on 2026-09-05  1:28:17
