@@ -287,7 +287,7 @@ console.log("Notifications:", notifications);
 };
 
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { logoutUser, authoritySubRole, setAuthoritySubRole, complaints, feedbacks } = useApp();
+const { logoutUser, authoritySubRole, setAuthoritySubRole, complaints, feedbacks, user, supervisorZone } = useApp();
 
 const [notifications, setNotifications] = useState<any[]>([]);
   const location = useLocation();
@@ -298,6 +298,8 @@ const [notifications, setNotifications] = useState<any[]>([]);
   const [supervisorPhoto, setSupervisorPhoto] = useState("");
   const [adminPhoto, setAdminPhoto] = useState("");
   const [workerPhoto, setWorkerPhoto] = useState("");
+  const [workerName, setWorkerName] = useState("");
+  const [workerRoleLabel, setWorkerRoleLabel] = useState("");
   React.useEffect(() => {
   if (authoritySubRole !== "Field Worker") return;
 
@@ -444,16 +446,16 @@ default:
   return {
     title: 'Supervisor Portal',
     subtitle: 'Zone Supervisor',
-    name: 'Rahul Sharma',
-    roleLabel: 'Shivajinagar Zone',
-avatar: supervisorPhoto || 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    name: user.name,
+    roleLabel: supervisorZone || 'Zone',
+    avatar: supervisorPhoto || 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
   };
       case 'Field Worker':
         return {
           title: 'Worker Portal',
           subtitle: 'Sanitation Worker',
-          name: 'Crew Leader Amit',
-          roleLabel: 'Field Crew #4 (Idle)',
+          name: user?.name || 'Loading...',
+          roleLabel: workerRoleLabel,
           avatar: workerPhoto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
         };
       case 'Admin':
@@ -472,7 +474,7 @@ avatar: supervisorPhoto || 'https://images.unsplash.com/photo-1519085360753-af01
 
   const handleLogout = () => {
     logoutUser();
-    navigate('/login');
+    navigate('/login', { state: { fromLogout: true } });
   };
 
   return (

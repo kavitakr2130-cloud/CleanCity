@@ -229,11 +229,7 @@ ON c.worker_id = w.worker_id
 LEFT JOIN vehicles v
 ON c.vehicle_id = v.vehicle_id
 
-WHERE c.zone_id = (
-    SELECT zone_id 
-    FROM supervisors 
-    WHERE supervisor_id = %s
-)
+WHERE c.supervisor_id = %s
 
 ORDER BY c.complaint_id DESC
     """, (supervisor_id,))
@@ -730,17 +726,19 @@ def profile(current_supervisor):
 
         SELECT
 
-            supervisor_id,
-            employee_id,
-            full_name,
-            email,
-            mobile_number,
-            zone_id,
-            status,
-            profile_photo,
-            created_at
+            s.supervisor_id,
+            s.employee_id,
+            s.full_name,
+            s.email,
+            s.mobile_number,
+            s.zone_id,
+            z.zone_name,
+            s.status,
+            s.profile_photo,
+            s.created_at
 
-        FROM supervisors
+        FROM supervisors s
+        LEFT JOIN zones z ON s.zone_id = z.zone_id
 
         WHERE supervisor_id=%s
 

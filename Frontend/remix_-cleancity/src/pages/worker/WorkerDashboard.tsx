@@ -35,6 +35,8 @@ const loadDashboard = async () => {
 
       const data = await getWorkerDashboardData();
       console.log("WORKER DASHBOARD DATA:", data);
+      console.log("WORKER ZONE NAME:", data.worker?.zone_name);
+
 
       setWorker(data.worker);
 
@@ -123,7 +125,7 @@ loadDashboard();
 </h1>
 
 <p className="text-sm text-slate-500 mt-1">
-  Zone : Shivajinagar
+  Zone : {worker?.zone_name ?? "Loading..."}
 </p>
 
 {/* Worker Profile */}

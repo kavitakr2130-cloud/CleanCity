@@ -283,8 +283,6 @@ export const getAllComplaints = async () => {
 
 export const getSupervisors = async () => {
   const token = localStorage.getItem("token");
-  console.log("Token from getSupervisors:", token);
-  console.log("Token in localStorage:", localStorage.getItem("token"));
 
   const response = await fetch("http://127.0.0.1:5000/admin/supervisors", {
     headers: {

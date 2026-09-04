@@ -198,14 +198,18 @@ def worker_dashboard_data(current_worker):
         # Worker Profile
     cursor.execute("""
         SELECT
-            worker_id,
-            employee_id,
-            full_name,
-            status,
-            crew_name
-            profile_photo
-        FROM workers
-        WHERE worker_id=%s
+            w.worker_id,
+            w.employee_id,
+            w.full_name,
+            w.status,
+            w.crew_name,
+            w.profile_photo,
+            w.zone_id,
+            z.zone_name
+        FROM workers w
+        LEFT JOIN zones z
+              ON w.zone_id = z.zone_id
+        WHERE w.worker_id=%s
     """, (worker_id,))
 
     worker = cursor.fetchone()

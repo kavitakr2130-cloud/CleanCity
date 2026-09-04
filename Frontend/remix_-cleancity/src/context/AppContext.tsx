@@ -14,7 +14,7 @@ import { submitFeedback } from "../services/api";
 // Dictionary containing translations for 11 regional languages
 export const translations: Record<string, Record<string, string>> = {
   english: {
-    welcome_msg: "Your single complaint, a new beginning for a clean and smart city. 🌿",
+    welcome_msg: "Your single complaint, a new beginning for a clean and smart city",
     report_btn: "Report Garbage",
     submitted: "Submitted",
     in_progress: "In Progress",
@@ -54,7 +54,7 @@ export const translations: Record<string, Record<string, string>> = {
     pending: "Pending"
   },
   hindi: {
-    welcome_msg: "आपकी एक शिकायत, स्वच्छ और स्मार्ट शहर की नई शुरुआत। 🌿",
+    welcome_msg: "आपकी एक शिकायत, स्वच्छ और स्मार्ट शहर की नई शुरुआत",
     report_btn: "कचरे की शिकायत करें",
     submitted: "कुल शिकायतें",
     in_progress: "प्रगति में",
@@ -94,7 +94,7 @@ export const translations: Record<string, Record<string, string>> = {
     pending: "लंभित"
   },
   marathi: {
-    welcome_msg: "तुमची एक तक्रार, स्वच्छ आणि स्मार्ट शहराची नवीन सुरुवात. 🌿",
+    welcome_msg: "तुमची एक तक्रार, स्वच्छ आणि स्मार्ट शहराची नवीन सुरुवात",
     report_btn: "कचऱ्याची तक्रार करा",
     submitted: "एकूण तक्रारी",
     in_progress: "प्रगतीपथावर",
@@ -134,7 +134,7 @@ export const translations: Record<string, Record<string, string>> = {
     pending: "प्रलंबित"
   },
   bengali: {
-    welcome_msg: "আপনার একটি অভিযোগ, পরিচ্ছন্ন ও স্মার্ট শহরের নতুন শুরু। 🌿",
+    welcome_msg: "আপনার একটি অভিযোগ, পরিচ্ছন্ন ও স্মার্ট শহরের নতুন শুরু",
     report_btn: "আবর্জনা রিপোর্ট করুন",
     submitted: "মোট অভিযোগ",
     in_progress: "চলমান",
@@ -174,7 +174,7 @@ export const translations: Record<string, Record<string, string>> = {
     pending: "তুলে ধরা"
   },
   tamil: {
-    welcome_msg: "உங்கள் ஒரு புகார், தூய்மையான மற்றும் ஸ்மார்ட் நகரத்தின் புதிய தொடக்கம். 🌿",
+    welcome_msg: "உங்கள் ஒரு புகார், தூய்மையான மற்றும் ஸ்மார்ட் நகரத்தின் புதிய தொடக்கம்",
     report_btn: "குப்பையைப் புகார் செய்",
     submitted: "மொத்த புகார்கள்",
     in_progress: "செயல்பாட்டில்",
@@ -214,7 +214,7 @@ export const translations: Record<string, Record<string, string>> = {
     pending: "நிலுவையில் உள்ளது"
   },
   telugu: {
-    welcome_msg: "మీ ఒక్క ఫిర్యాదు, స్వచ్ఛమైన మరియు స్మార్ట్ నగరానికి కొత్త ప్రారంభం. 🌿",
+    welcome_msg: "మీ ఒక్క ఫిర్యాదు, స్వచ్ఛమైన మరియు స్మార్ట్ నగరానికి కొత్త ప్రారంభం",
     report_btn: "చెత్తపై ఫిర్యాదు చేయండి",
     submitted: "మొత్తం ఫిర్యాదులు",
     in_progress: "ప్రగతిలో ఉంది",
@@ -254,7 +254,7 @@ export const translations: Record<string, Record<string, string>> = {
     pending: "పెండింగ్‌లో ఉంది"
   },
   kannada: {
-    welcome_msg: "ನಿಮ್ಮ ಒಂದು ದೂರು, ಸ್ವಚ್ಛ ಮತ್ತು ಸ್ಮಾರ್ಟ್ ನಗರದ ಹೊಸ ಆರಂಭ. 🌿",
+    welcome_msg: "ನಿಮ್ಮ ಒಂದು ದೂರು, ಸ್ವಚ್ಛ ಮತ್ತು ಸ್ಮಾರ್ಟ್ ನಗರದ ಹೊಸ ಆರಂಭ",
     report_btn: "ಕಸದ ದೂರು ನೀಡಿ",
     submitted: "ಒಟ್ಟು ದೂರುಗಳು",
     in_progress: "ಪ್ರಗತಿಯಲ್ಲಿದೆ",
@@ -294,7 +294,7 @@ export const translations: Record<string, Record<string, string>> = {
     pending: "ಬಾಕಿ ಇದೆ"
   },
   malayalam: {
-    welcome_msg: "നിങ്ങളുടെ ഒരു പരാതി, വൃത്തിയുള്ളതും സ്മാർട്ട് ആയതുമായ നഗരത്തിന്റെ പുതിയ തുടക്കം. 🌿",
+    welcome_msg: "നിങ്ങളുടെ ഒരു പരാതി, വൃത്തിയുള്ളതും സ്മാർട്ട് ആയതുമായ നഗരത്തിന്റെ പുതിയ തുടക്കം",
     report_btn: "മാലിന്യം റിപ്പോർട്ട് ചെയ്യുക",
     submitted: "ആകെ പരാതികൾ",
     in_progress: "നടന്നുകൊണ്ടിരിക്കുന്നു",
@@ -334,7 +334,7 @@ export const translations: Record<string, Record<string, string>> = {
     pending: "തീരുമാനമാകാത്തത്"
   },
   gujarati: {
-    welcome_msg: "તમારી એક ફરિયાદ, સ્વચ્છ અને સ્માર્ટ શહેરની નવી શરૂઆત. 🌿",
+    welcome_msg: "તમારી એક ફરિયાદ, સ્વચ્છ અને સ્માર્ટ શહેરની નવી શરૂઆત",
     report_btn: "કચરાની ફરિયાદ કરો",
     submitted: "કુલ ફરિયાદો",
     in_progress: "પ્રગતિમાં",
@@ -374,7 +374,7 @@ export const translations: Record<string, Record<string, string>> = {
     pending: "બાકી"
   },
   punjabi: {
-    welcome_msg: "ਤੁਹਾਡੀ ਇੱਕ ਸ਼ਿਕਾਇਤ, ਸਾਫ਼ ਅਤੇ ਸਮਾਰਟ ਸ਼ਹਿਰ ਦੀ ਨਵੀਂ ਸ਼ੁਰੂਆਤ। 🌿",
+    welcome_msg: "ਤੁਹਾਡੀ ਇੱਕ ਸ਼ਿਕਾਇਤ, ਸਾਫ਼ ਅਤੇ ਸਮਾਰਟ ਸ਼ਹਿਰ ਦੀ ਨਵੀਂ ਸ਼ੁਰੂਆਤ",
     report_btn: "ਕੂੜੇ ਦੀ ਸ਼ਿਕਾਇਤ ਕਰੋ",
     submitted: "ਕੁੱਲ ਸ਼ਿਕਾਇਤਾਂ",
     in_progress: "ਚੱਲ ਰਿਹਾ ਹੈ",
@@ -414,7 +414,7 @@ export const translations: Record<string, Record<string, string>> = {
     pending: "ਲੰਬਿਤ"
   },
   odia: {
-    welcome_msg: "ଆପଣଙ୍କର ଗୋଟିଏ ଅଭିଯୋଗ, ସ୍ୱଚ୍ଛ ଓ ସ୍ମାର୍ਟ ସହରର ନୂଆ ଆରମ୍ଭ। 🌿",
+    welcome_msg: "ଆପଣଙ୍କର ଗୋଟିଏ ଅଭିଯୋଗ, ସ୍ୱଚ୍ଛ ଓ ସ୍ମାର୍ਟ ସହରର ନୂଆ ଆରମ୍ଭ",
     report_btn: "ଆବର୍ଜନା ଅଭିଯୋଗ କରନ୍ତୁ",
     submitted: "ସମୁଦାୟ ଅଭିଯୋଗ",
     in_progress: "ଚାଲୁଅଛି",
@@ -477,6 +477,7 @@ interface AppContextType {
   teams: WorkforceTeam[];
   currentRole: 'citizen' | 'admin' | 'supervisor' | 'worker';
   authoritySubRole: 'Admin' | 'Supervisor' | 'Field Worker';
+  supervisorZone: string | null;
   setAuthoritySubRole: (subrole: 'Admin' | 'Supervisor' | 'Field Worker') => void;
   isLoggedIn: boolean;
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
@@ -539,6 +540,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [complaints, setComplaints] = useState<Complaint[]>(() => storage.getComplaints());
   
   const [feedbacks, setFeedbacks] = useState<ComplaintFeedback[]>(() => storage.getFeedbacks());
+  const [supervisorZone, setSupervisorZone] = useState<string | null>(null);
   const [user, setUser] = useState<Citizen>(() => {
     const savedUser = storage.getUser();
     const role = localStorage.getItem('cleancity_role') || 'citizen';
@@ -814,6 +816,8 @@ const supervisorRep: Citizen = {
   avatar: ""
 };
 
+setSupervisorZone(authUser.supervisor.zone_name);
+
 setUser(supervisorRep);
 storage.setUser(supervisorRep);
 setAuthoritySubRole("Supervisor");
@@ -849,16 +853,26 @@ resolve(true);
 
           localStorage.setItem("token", authUser.token);
 
-          const workerRep: Citizen = {
-            id: authUser.worker.employee_id,
-            name: authUser.worker.full_name,
-            phoneNumber: "",
-            email: authUser.worker.email,
-            password: "",
-            cleanPoints: 0,
-            rank: "BRONZE",
-            avatar: ""
-          };
+         const workerRep: Citizen = {
+  id: authUser.worker.employee_id,
+  name: authUser.worker.full_name,
+  phoneNumber: "",
+  email: authUser.worker.email,
+  password: "",
+  cleanPoints: 0,
+  rank: "BRONZE",
+  avatar: ""
+};
+
+localStorage.setItem(
+  "worker_zone_id",
+  String(authUser.worker.zone_id)
+);
+
+localStorage.setItem(
+  "worker_crew_name",
+  authUser.worker.crew_name || ""
+);
 
           setUser(workerRep);
           storage.setUser(workerRep);
@@ -943,7 +957,7 @@ setIsLoggedIn(true);
         storage.setUser(newCitizen);
         setIsLoggedIn(true);
         console.log("Citizen login success");
-console.log("Token:", localStorage.getItem("token"));
+// console.log("Token:", localStorage.getItem("token"));
 
         sessionStorage.setItem('cleancity_session_loggedin', 'true');
         if (remember) {
@@ -965,15 +979,25 @@ console.log("Token:", localStorage.getItem("token"));
   };
 
   const logoutUser = () => {
-    setIsLoggedIn(false);
-    localStorage.removeItem('cleancity_loggedin');
-    localStorage.removeItem('cleancity_remember_me');
-    localStorage.removeItem('cleancity_remembered_user');
-    localStorage.removeItem('cleancity_role');
-    sessionStorage.removeItem('cleancity_session_loggedin');
-    setUser(mockCitizen);
-    storage.setUser(mockCitizen);
-  };
+  const roleBeforeLogout = currentRole;
+
+  setIsLoggedIn(false);
+
+  localStorage.removeItem('cleancity_loggedin');
+  localStorage.removeItem('cleancity_remember_me');
+  localStorage.removeItem('cleancity_remembered_user');
+  localStorage.removeItem('cleancity_authority_subrole');
+  sessionStorage.removeItem('cleancity_session_loggedin');
+
+  setUser(mockCitizen);
+  storage.setUser(mockCitizen);
+
+  if (roleBeforeLogout === 'citizen') {
+    setRole('citizen');
+  } else {
+    setRole('admin');
+  }
+};
 
   // Submit Complaint with Simulated AI processing
   const submitGrievance = async (
@@ -1531,6 +1555,7 @@ console.log("Token:", localStorage.getItem("token"));
       teams,
       currentRole,
       authoritySubRole,
+      supervisorZone,
       setAuthoritySubRole,
       isLoggedIn,
       setIsLoggedIn,

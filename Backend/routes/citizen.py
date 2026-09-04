@@ -10,7 +10,7 @@ from google.genai import types
 import uuid
 
 
-print("Gemini Key:", Config.GEMINI_API_KEY)
+# print("Gemini Key:", Config.GEMINI_API_KEY)
 
 client = genai.Client(api_key=Config.GEMINI_API_KEY)
 
