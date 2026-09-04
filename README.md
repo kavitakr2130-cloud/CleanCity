@@ -96,7 +96,7 @@ Add your own credentials for:
 * MySQL database
 * JWT Secret Key
 * Gemini API Key
-* Twilio credentials (if used)
+
 
 Example:
 
@@ -107,9 +107,6 @@ DB_PASSWORD=your_mysql_password
 DB_NAME=cleancity
 JWT_SECRET_KEY=your_secret_key
 GEMINI_API_KEY=your_gemini_api_key
-TWILIO_ACCOUNT_SID=your_twilio_account_sid
-TWILIO_AUTH_TOKEN=your_twilio_auth_token
-TWILIO_PHONE_NUMBER=your_twilio_phone_number
 ```
 
 **Do not upload the actual `.env` file or any API keys/passwords to GitHub.**
@@ -220,7 +217,6 @@ Do not share or upload:
 * MySQL passwords
 * Gemini API keys
 * JWT secret keys
-* Twilio credentials
 * `.env` files
 * User-uploaded complaint images containing private data
 
