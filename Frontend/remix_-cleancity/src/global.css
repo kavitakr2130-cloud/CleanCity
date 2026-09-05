@@ -1,0 +1,152 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap");
+
+:root {
+  --green-dark: #075e3c;
+  --green-deep: #064d34;
+  --green-bright: #11ae75;
+  --green-light: #dff8ed;
+  --green-pale: #f4fcf8;
+  --text: #16362a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--text);
+  font-family: "Nunito", Arial, sans-serif;
+  font-size: 15px;
+  background:
+    radial-gradient(circle at 12% 15%, rgba(17, 174, 117, 0.20), transparent 24%),
+    radial-gradient(circle at 87% 82%, rgba(24, 145, 220, 0.15), transparent 25%),
+    linear-gradient(135deg, #f6fffa 0%, #e6f8ed 48%, #f3fbff 100%);
+  overflow-x: hidden;
+}
+
+/* Moving soft green bubbles */
+body::before,
+body::after {
+  position: fixed;
+  z-index: -1;
+  width: 260px;
+  height: 260px;
+  content: "";
+  background: rgba(17, 174, 117, 0.13);
+  border-radius: 50%;
+  filter: blur(18px);
+  pointer-events: none;
+  animation: floatBackground 12s ease-in-out infinite;
+}
+
+body::before {
+  top: 10%;
+  left: -80px;
+}
+
+body::after {
+  right: -70px;
+  bottom: 8%;
+  background: rgba(55, 140, 255, 0.11);
+  animation-delay: -6s;
+}
+
+@keyframes floatBackground {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(45px, -35px) scale(1.12);
+  }
+}
+
+/* Two-shaded green heading like “Welcome to Twilio” */
+.green-gradient-heading {
+  margin: 0;
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: clamp(30px, 4vw, 54px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+  background: linear-gradient(90deg, #075e3c 0%, #0aa66b 48%, #58c784 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* General card design */
+.clean-card {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(17, 174, 117, 0.18);
+  border-radius: 22px;
+  box-shadow: 0 14px 35px rgba(7, 94, 60, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+/* Bigger login card */
+.login-card {
+  width: min(92vw, 520px);
+  min-height: 520px;
+  padding: 42px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(17, 174, 117, 0.22);
+  border-radius: 28px;
+  box-shadow: 0 20px 60px rgba(7, 94, 60, 0.18);
+  backdrop-filter: blur(14px);
+}
+
+/* Green button */
+.clean-button {
+  width: 100%;
+  padding: 13px 20px;
+  color: white;
+  background: linear-gradient(135deg, #075e3c, #11ae75);
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 8px 18px rgba(7, 94, 60, 0.24);
+  font: 700 15px "Nunito", Arial, sans-serif;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.clean-button:hover {
+  box-shadow: 0 12px 24px rgba(7, 94, 60, 0.32);
+  transform: translateY(-3px);
+}
+
+/* Desktop: use the available screen instead of phone width */
+.page-shell {
+  width: min(1180px, calc(100% - 48px));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+/* Mobile: preserve a comfortable phone layout */
+@media (max-width: 600px) {
+  body {
+    font-size: 14px;
+  }
+
+  .page-shell {
+    width: calc(100% - 28px);
+    padding: 24px 0;
+  }
+
+  .login-card {
+    width: 100%;
+    min-height: auto;
+    padding: 28px 22px;
+  }
+}

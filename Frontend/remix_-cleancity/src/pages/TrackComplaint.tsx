@@ -39,11 +39,10 @@ export const TrackComplaint: React.FC = () => {
           submitTime: new Date(c.submitted_at).toLocaleString(),
           submitTimestamp: c.submitted_at,
 
-          beforeImage: `http://127.0.0.1:5000/${c.image_before.replace(/\\/g, "/")}`,
+         beforeImage: `http://127.0.0.1:5000/${c.image_before.replace(/\\/g, "/")}`,
           afterImage: c.image_after
-            ? `http://127.0.0.1:5000/${c.image_after.replace(/\\/g, "/")}`
-            : null,
-
+          ? `http://127.0.0.1:5000/${c.image_after.replace(/\\/g, "/")}`
+          : null,
           liveUpdates: [],
           comments: [],
           assignedVehicle: null,

@@ -20,7 +20,7 @@ import { getSupervisorNotifications } from "../../services/api";
 export const SupervisorDashboard: React.FC = () => {
   const navigate = useNavigate();
 
-  const { authoritySubRole } = useApp();
+  const { authoritySubRole, user, supervisorZone } = useApp();
 
   const [complaints, setComplaints] = React.useState<any[]>([]);
   const [workers, setWorkers] = React.useState<any[]>([]);
@@ -63,9 +63,6 @@ if (notificationData.notifications) {
 
   };
 
- 
-
-
  return (
   <div className="p-8 bg-slate-50 min-h-screen">
     <div className="mb-8">
@@ -74,11 +71,11 @@ if (notificationData.notifications) {
 </h1>
 
 <p className="text-emerald-600 font-semibold mt-2">
-  Shivajinagar Zone
+  Zone {supervisorZone}
 </p>
 
 <p className="text-slate-500">
-  Welcome back • Rahul Sharma
+  Welcome back • {user.name}
 </p>
     </div>
 

@@ -55,8 +55,6 @@ def admin_login():
 
     admin = cursor.fetchone()
 
-    print("ADMIN DATA:", admin)
-
     if not admin:
         cursor.close()
         conn.close()
@@ -65,8 +63,6 @@ def admin_login():
             "message": "Account not found."
         }),404
 
-
-    print("PASSWORD RECEIVED:", password)
 
     result = bcrypt.checkpw(
         password.encode(),
@@ -134,10 +130,12 @@ def supervisor_login():
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT *
-        FROM supervisors
-        WHERE employee_id=%s
-           OR email=%s
+        SELECT s.*, z.zone_name
+        FROM supervisors AS s
+        LEFT JOIN zones AS z
+            ON s.zone_id = z.zone_id
+        WHERE s.employee_id=%s
+           OR s.email=%s
     """, (login, login))
 
     supervisor = cursor.fetchone()
@@ -187,7 +185,7 @@ def supervisor_login():
             "employee_id": supervisor["employee_id"],
             "full_name": supervisor["full_name"],
             "email": supervisor["email"],
-            "zone_id": supervisor["zone_id"]
+            "zone_name": supervisor["zone_name"]
         }
     })  
     

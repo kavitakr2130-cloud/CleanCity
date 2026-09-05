@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Phone, ArrowRight, ShieldCheck, CheckCircle2, User, Landmark, Mail, Lock, Check, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { Logo } from '../components/Logo';
@@ -46,11 +46,9 @@ const subRole = localStorage.getItem("cleancity_authority_subrole");
 
   // Mode toggles
  const [loginMethod, setLoginMethod] = useState<'password' | 'otp'>('password');
-  const [usernameInput, setUsernameInput] = useState(() => {
-    return localStorage.getItem('cleancity_remembered_user') || '';
-  });
+  const [usernameInput, setUsernameInput] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(() => localStorage.getItem('cleancity_remember_me') === 'true');
+  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const [googleNewUser, setGoogleNewUser] = useState(false);
@@ -83,11 +81,21 @@ const subRole = localStorage.getItem("cleancity_authority_subrole");
   }, [successToast]);
 
   useEffect(() => {
+  const timer = setTimeout(() => {
+    setUsernameInput('');
+    setPassword('');
+  }, 300);
+
+  return () => clearTimeout(timer);
+}, []);
+
+  useEffect(() => {
     setLoginMethod(currentRole === 'citizen' ? 'otp' : 'password');
     setOtpSent(false);
     setSmsVisible(false);
     setError('');
-    setUsernameInput(localStorage.getItem('cleancity_remembered_user') || '');
+    setUsernameInput('');
+    setPassword('');
   }, [currentRole]);
 
   useEffect(() => {
@@ -228,17 +236,11 @@ if (currentRole === "admin" && adminRole === "Field Worker") {
 
 const success = await loginUser(usernameInput, password, rememberMe);
       if (success) {
-        if (rememberMe) {
-          localStorage.setItem('cleancity_remembered_user', usernameInput);
-          localStorage.setItem('cleancity_remember_me', 'true');
-        } else {
-          localStorage.removeItem('cleancity_remembered_user');
-          localStorage.setItem('cleancity_remember_me', 'false');
-        }
+
 
         setIsLoading(false);
         setSuccessToast('Signed in successfully!');
-        
+
         if (currentRole === 'admin') {
           navigate('/admin/dashboard');
         } else {
@@ -254,7 +256,7 @@ const success = await loginUser(usernameInput, password, rememberMe);
     }
   };
 
-  
+
   // Handle requesting an OTP
   /*
  const handleRequestOtp = async (e: React.FormEvent) => {
@@ -273,7 +275,7 @@ const success = await loginUser(usernameInput, password, rememberMe);
 
     const data = await sendOtp(usernameInput);
 
-    
+
     setOtpSent(true);
     setCountdown(60);
     setSuccessToast("OTP sent successfully to your registered mobile number.");
@@ -352,11 +354,20 @@ const success = await loginUser(usernameInput, password, rememberMe);
   };
 
   const handleRoleToggle = (role: 'citizen' | 'admin') => {
-    setRole(role);
-    setOtpSent(false);
-    setSmsVisible(false);
-    setError('');
-  };
+  setUsernameInput('');
+  setPassword('');
+  setError('');
+  setOtpSent(false);
+  setSmsVisible(false);
+
+  setRole(role);
+
+  // Clear Chrome autofill after switching between Citizen and Authority
+  setTimeout(() => {
+    setUsernameInput('');
+    setPassword('');
+  }, 500);
+};
 
 
 
@@ -374,7 +385,7 @@ const success = await loginUser(usernameInput, password, rememberMe);
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        
+
         {/* Header / Logo */}
         <header className="flex flex-col items-center mb-8">
           <div className="mb-3 transform hover:scale-105 transition-transform duration-300">
@@ -384,8 +395,8 @@ const success = await loginUser(usernameInput, password, rememberMe);
             CleanCity
           </h2>
           <p className="text-xs font-bold text-slate-400 text-center mt-2 px-4 leading-relaxed">
-            {currentRole === 'admin' 
-              ? 'MUNICIPAL INTERNAL CONSOLE PORTAL' 
+            {currentRole === 'admin'
+              ? 'MUNICIPAL INTERNAL CONSOLE PORTAL'
               : 'REPORT GARBAGE • TRACK TEAMS • EARN CLEANPOINTS'}
           </p>
 
@@ -429,7 +440,7 @@ const success = await loginUser(usernameInput, password, rememberMe);
               <h3 className="font-extrabold text-slate-800 text-sm">Recover Password</h3>
               <p className="text-[11px] text-slate-400">Enter your email and we'll send you a password reset link.</p>
             </div>
-            
+
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block ml-1">
                 Email Address
@@ -477,17 +488,10 @@ const success = await loginUser(usernameInput, password, rememberMe);
                     <button
                       key={r}
                       type="button"
-                      onClick={() => {
-                          setAdminRole(r);
-
-                          if (r === "Admin") {
-                            setRole("admin");
-                          } else if (r === "Supervisor") {
-                            setRole("supervisor");
-                          } else {
-                            setRole("worker");
-                          }
-                        }}
+                    onClick={() => {
+  setAdminRole(r);
+  setRole("admin");
+}}
                       className={`py-2 px-1 rounded-xl border text-[9px] font-black tracking-tight uppercase transition-all cursor-pointer ${
                         adminRole === r
                           ? 'bg-slate-800 text-white border-slate-800 shadow-xs'
@@ -500,7 +504,7 @@ const success = await loginUser(usernameInput, password, rememberMe);
                 </div>
               </div>
             )}
-            
+
 {/* FORM CONDITIONAL PATHS */}
 {googleNewUser ? (
   <form className="space-y-4">
@@ -651,7 +655,11 @@ const success = await loginUser(usernameInput, password, rememberMe);
 //               </form>
             ) : (
               /* STANDARD PASSWORD OR EMAIL LOGIN FORM */
-                 <form onSubmit={handlePasswordLogin} className="space-y-4">
+     <form
+  onSubmit={handlePasswordLogin}
+  className="space-y-4"
+  autoComplete="off"
+>
                 {/* Username/Email/Phone Input */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block ml-1">
@@ -665,11 +673,14 @@ const success = await loginUser(usernameInput, password, rememberMe);
                     )}
                    <input
                       type={currentRole === 'citizen' ? 'email' : 'text'}
+                      name="username"
+                      autoComplete="username"
                       required
                       value={usernameInput}
                       onChange={(e) => setUsernameInput(e.target.value)}
-                      placeholder={currentRole === 'admin' ? 'admin@cleancity.gov' : 'name@example.com'}
+                      placeholder={currentRole === 'admin' ? '' : 'name@example.com'}
                       className="w-full px-3 py-3 bg-transparent text-xs font-semibold focus:outline-none text-slate-800"
+
                     />
                   </div>
                 </div>
@@ -693,11 +704,13 @@ const success = await loginUser(usernameInput, password, rememberMe);
                       <Lock className="w-4 h-4 text-slate-400 flex-shrink-0" />
                       <input
                         type={showPassword ? 'text' : 'password'}
+                        autoComplete="current-password"
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••••"
                         className="w-full px-3 py-3 bg-transparent text-xs font-semibold focus:outline-none text-slate-800"
+
                       />
                       <button
                         type="button"
@@ -795,7 +808,7 @@ const success = await loginUser(usernameInput, password, rememberMe);
               <p id="gov-portal-notice-msg" className="text-[11px] font-semibold text-slate-400 leading-relaxed">
                 Department Portal: Employee accounts are pre-created by the Government/Department. Self-registration is disabled for Admin, Supervisor, and Field Workers.
               </p>
-             
+
             </div>
           ) : (
             <></>
