@@ -234,7 +234,13 @@ setSaveSuccess(true);
             <div className="relative group">
               <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-50 shadow-md">
                 <img 
-                  src={isEditing ? editForm.avatar : profile.avatar} 
+                src={
+                    (isEditing ? editForm.avatar : profile.avatar)?.startsWith("http") ||
+                    (isEditing ? editForm.avatar : profile.avatar)?.startsWith("data:") ||
+                    (isEditing ? editForm.avatar : profile.avatar)?.startsWith("blob:")
+                      ? (isEditing ? editForm.avatar : profile.avatar)
+                      : `http://127.0.0.1:5000/${(isEditing ? editForm.avatar : profile.avatar)?.replace(/\\/g, "/")}`
+                  }
                   alt={profile.name} 
                   className="w-full h-full object-cover"
                 />

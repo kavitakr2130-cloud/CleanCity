@@ -775,8 +775,8 @@ def update_profile(current_supervisor):
 
     if profile_photo:
        filename = f"{uuid.uuid4().hex}_{secure_filename(profile_photo.filename)}"
-       profile_photo_path = os.path.join(UPLOAD_FOLDER, filename)
-       profile_photo.save(profile_photo_path)
+       profile_photo_path = os.path.join("uploads", filename)
+       profile_photo.save(os.path.join(UPLOAD_FOLDER, filename))
 
     conn = get_db_connection()
     cursor = conn.cursor()

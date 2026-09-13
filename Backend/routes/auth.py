@@ -261,7 +261,64 @@ def worker_login():
         }
     })  
         
+# -------------------------------
+# Citizen Email Login
+# -------------------------------
+@auth_bp.route("/citizen/login", methods=["POST"])
+def citizen_login():
 
+    data = request.json
+    email = data.get("email")
+
+    if not email:
+        return jsonify({
+            "message": "Email is required"
+        }), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM users
+        WHERE email=%s
+        """,
+        (email.strip(),)
+    )
+
+    user = cursor.fetchone()
+
+    if not user:
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            "message": "Citizen account not found.",
+            "existing_user": False
+        }), 404
+
+    token = jwt.encode(
+        {
+            "user_id": user["user_id"],
+            "role": "Citizen",
+            "exp": datetime.utcnow() + timedelta(days=30)
+        },
+        Config.JWT_SECRET_KEY,
+        algorithm="HS256"
+    )
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({
+        "message": "Login Successful",
+        "existing_user": True,
+        "user_type": "Citizen",
+        "token": token,
+        "user": user
+    }), 200
+    
 # -------------------------------
 # Send OTP
 # -------------------------------
