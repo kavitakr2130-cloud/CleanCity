@@ -3,7 +3,7 @@ import bcrypt
 import jwt
 from datetime import datetime, timedelta
 from database import get_db_connection
-from twilio.rest import Client
+
 from config import Config
 
 from google.oauth2 import id_token
@@ -319,117 +319,7 @@ def citizen_login():
         "user": user
     }), 200
     
-# -------------------------------
-# Send OTP
-# -------------------------------
-@auth_bp.route("/send-otp", methods=["POST"])
-def send_otp():
 
-    data = request.json
-    mobile_number = data.get("mobile_number")
-
-    if not mobile_number:
-        return jsonify({
-            "message": "Mobile number is required"
-        }), 400
-
-
-    # Send OTP using Twilio Verify
-    client = Client(
-        Config.TWILIO_ACCOUNT_SID,
-        Config.TWILIO_AUTH_TOKEN
-    )
-
-    client.verify.v2.services(
-        Config.TWILIO_VERIFY_SERVICE_SID
-    ).verifications.create(
-        to="+91" + mobile_number,
-        channel="sms"
-    )
-
-
-    return jsonify({
-        "message": "OTP Sent Successfully"
-    })
-# -------------------------------
-# Verify OTP
-# -------------------------------
-@auth_bp.route("/verify-otp", methods=["POST"])
-def verify_otp():
-
-    data = request.json
-    mobile_number = data.get("mobile_number")
-    otp = data.get("otp")
-    full_name = data.get("full_name", "Citizen")
-
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    # Verify OTP using Twilio
-    client = Client(
-        Config.TWILIO_ACCOUNT_SID,
-        Config.TWILIO_AUTH_TOKEN
-    )
-
-    verification_check = client.verify.v2.services(
-        Config.TWILIO_VERIFY_SERVICE_SID
-    ).verification_checks.create(
-        to="+91" + mobile_number,
-        code=otp
-    )
-
-    if verification_check.status != "approved":
-        cursor.close()
-        conn.close()
-        return jsonify({
-            "message": "Invalid or Expired OTP"
-        }), 400
-
-    # Check if user already exists
-    cursor.execute(
-        "SELECT * FROM users WHERE mobile_number=%s",
-        (mobile_number,)
-    )
-
-    user = cursor.fetchone()
-
-    # Create new citizen if not exists
-    if not user:
-
-        cursor.execute("""
-        INSERT INTO users
-        (full_name, mobile_number, is_verified)
-        VALUES (%s, %s, TRUE)
-        """, (full_name, mobile_number))
-
-        conn.commit()
-
-        cursor.execute(
-            "SELECT * FROM users WHERE mobile_number=%s",
-            (mobile_number,)
-        )
-
-        user = cursor.fetchone()
-
-    token = jwt.encode(
-        {
-            "user_id": user["user_id"],
-            "role": "Citizen",
-            "exp": datetime.utcnow() + timedelta(days=30)
-        },
-        Config.JWT_SECRET_KEY,
-        algorithm="HS256"
-    )
-
-    cursor.close()
-    conn.close()
-
-    return jsonify({
-        "message": "Login Successful",
-        "user_type": "Citizen",
-        "token": token,
-        "user": user
-    })
     
 # -------------------------------
 # Google Login
