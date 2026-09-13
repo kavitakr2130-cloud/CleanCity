@@ -472,6 +472,7 @@ export const languageOptions = [
 interface AppContextType {
   complaints: Complaint[];
   user: Citizen;
+  setUser: React.Dispatch<React.SetStateAction<Citizen>>;
   notifications: AppNotification[];
   setNotifications: React.Dispatch<React.SetStateAction<AppNotification[]>>;
   teams: WorkforceTeam[];
@@ -892,6 +893,7 @@ setIsLoggedIn(true);
       else {
   try {
     const profileData = await getProfile();
+    console.log("CITIZEN LOGIN PROFILE:", profileData);
     const profile = profileData.user;
 
     const newCitizen: Citizen = {
@@ -982,6 +984,7 @@ setIsLoggedIn(true);
   const roleBeforeLogout = currentRole;
 
   setIsLoggedIn(false);
+  localStorage.removeItem('token');
 
   localStorage.removeItem('cleancity_loggedin');
   localStorage.removeItem('cleancity_remember_me');
@@ -1550,6 +1553,7 @@ setIsLoggedIn(true);
     <AppContext.Provider value={{
       complaints,
       user,
+      setUser,
       notifications,
       setNotifications,
       teams,

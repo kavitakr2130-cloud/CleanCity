@@ -16,7 +16,7 @@ client = genai.Client(api_key=Config.GEMINI_API_KEY)
 
 citizen_bp = Blueprint("citizen", __name__)
 
-UPLOAD_FOLDER = "uploads"
+UPLOAD_FOLDER = Config.UPLOAD_FOLDER
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -204,9 +204,9 @@ def update_profile(current_user):
     # Save profile photo if uploaded
     if profile_photo:
         filename = f"{uuid.uuid4().hex}_{secure_filename(profile_photo.filename)}"
-        profile_photo_path = os.path.join(UPLOAD_FOLDER, filename)
+        profile_photo_path = os.path.join("uploads", filename)
 
-        profile_photo.save(profile_photo_path)
+        profile_photo.save(os.path.join(UPLOAD_FOLDER, filename))
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -392,8 +392,17 @@ def submit_complaint(current_user):
             }), 400
 
         filename = f"{uuid.uuid4().hex}_{secure_filename(image.filename)}"
-        image_path = os.path.join(UPLOAD_FOLDER, filename)
-        image.save(image_path)
+        project_root = os.path.dirname(
+            os.path.dirname(  
+                os.path.dirname(os.path.abspath(__file__))  
+            )
+        )  
+        upload_folder = os.path.join(project_root, "uploads") 
+        if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)     
+                            
+        image_path = os.path.join("uploads", filename)
+        image.save(os.path.join(upload_folder, filename))
 
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)

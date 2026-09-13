@@ -47,13 +47,6 @@ const DEFAULT_PROFILE: AdminProfileData = {
   status: 'Active'
 };
 
-const AVATAR_PRESETS = [
-  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
-];
 
 export const AdminProfile: React.FC = () => {
   const navigate = useNavigate();
@@ -241,70 +234,44 @@ setTimeout(() => setSaveSuccess(false), 3000);
             </div>
 
         {showAvatarPicker && isEditing && (
-  <div className="w-full border-t border-slate-100 pt-4 space-y-3">
-    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-      Select Preset Avatar
-    </p>
+          <div className="w-full border-t border-slate-100 pt-4 space-y-3">
+  
+           {/* Upload Profile Photo */}
+          <div className="flex justify-center">
+           <label className="cursor-pointer flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-[10px] font-bold text-slate-700">
+             Upload Profile Photo
 
-    <div className="flex justify-center gap-2">
-      {AVATAR_PRESETS.map((url, i) => (
-        <button
-          key={i}
-          type="button"
-          onClick={() => handlePresetSelect(url)}
-          className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-all hover:scale-105 cursor-pointer ${
-            editForm.avatar === url
-              ? 'border-emerald-500 scale-105'
-              : 'border-transparent'
-          }`}
-        >
-          <img
-            src={url}
-            alt={`preset ${i}`}
-            className="w-full h-full object-cover"
-          />
-        </button>
-      ))}
-    </div>
+         <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
 
-    {/* Upload Profile Photo */}
-    <div className="flex justify-center">
-      <label className="cursor-pointer flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-[10px] font-bold text-slate-700">
-        Upload Profile Photo
+              if (!file) return;
 
-        <input
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
+              setProfilePhotoFile(file);
 
-            if (!file) return;
+              const reader = new FileReader();
 
-            setProfilePhotoFile(file);
+              reader.onload = (event) => {
+                const result = event.target?.result;
 
-            const reader = new FileReader();
+              if (typeof result === "string") {
+                 setEditForm(prev => ({
+                   ...prev,
+                   avatar: result
+              }));
+            }
+          };
 
-           reader.onload = (event) => {
-  const result = event.target?.result;
-
-  if (typeof result === "string") {
-    setEditForm(prev => ({
-      ...prev,
-      avatar: result
-    }));
-  }
-};
-
-            reader.readAsDataURL(file);
+              reader.readAsDataURL(file);
           }}
         />
       </label>
     </div>
 
-    <div className="text-[9px] text-slate-400 font-semibold">
-      Or input any URL directly in the profile settings form.
-    </div>
+    
   </div>
 )}
 
@@ -520,22 +487,7 @@ setTimeout(() => setSaveSuccess(false), 3000);
                   )}
                 </div>
 
-                {/* Custom Avatar URL input inside Edit mode */}
-                {isEditing && (
-                  <div className="md:col-span-2 space-y-1 text-left">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                      <Camera className="w-3.5 h-3.5 text-slate-400" />
-                      Custom Avatar URL
-                    </label>
-                    <input 
-                      type="text"
-                      name="avatar"
-                      value={editForm.avatar}
-                      onChange={handleInputChange}
-                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
-                    />
-                  </div>
-                )}
+               
 
               </div>
 

@@ -8,14 +8,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
-const AVATAR_PRESETS = [
-  'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200',
-  'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&q=80&w=200',
-  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200',
-  'https://images.unsplash.com/photo-1607990283143-e81e7a2c93ab?auto=format&fit=crop&q=80&w=200',
-  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200',
-];
+
 
 export const Profile: React.FC = () => {
 const { complaints, updateUserProfile, logoutUser, t, currentLanguage } = useApp();
@@ -37,9 +30,9 @@ useEffect(() => {
     if (data.user.profile_photo) {
       const photoPath = data.user.profile_photo.replace(/\\/g, "/");
       setEditAvatar(`${BASE_URL}/${photoPath}`);
-    } else {
-      setEditAvatar(AVATAR_PRESETS[0]);
-    }
+   } else {
+  setEditAvatar("");
+}
   };
 
   loadProfile();
@@ -232,20 +225,23 @@ const handleSave = async () => {
 );
 console.log("UPDATED PROFILE RESPONSE:", response);
 
-    updateUserProfile(
-      editName,
-      editEmail,
-      editPhone,
-      undefined,
-      editAvatar
-    );
+   const savedPhoto = response.profile_photo
+  ? `${BASE_URL}/${response.profile_photo.replace(/\\/g, "/")}`
+  : editAvatar;
 
+updateUserProfile(
+  editName,
+  editEmail,
+  editPhone,
+  undefined,
+  savedPhoto
+);
    setUser((prev: any) => ({
   ...prev,
   full_name: editName,
   email: editEmail,
   mobile_number: editPhone,
-  avatar: editAvatar,
+  avatar: savedPhoto,
 }));
 
     setIsEditing(false);
@@ -475,34 +471,7 @@ const totalResolved = user?.resolved_complaints || 0;
               </div>
             </div>
 
-            {/* CURATED AVATARS */}
-            <div className="space-y-1.5 pt-2">
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Curated Avatar Presets</span>
-              <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-none">
-                {AVATAR_PRESETS.map((preset, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      stopCamera();
-                      setEditAvatar(preset);
-                    }}
-                    className={`relative w-12 h-12 rounded-full overflow-hidden border-2 transition-all flex-shrink-0 cursor-pointer ${
-                      editAvatar === preset ? 'border-emerald-600 scale-105 shadow-md' : 'border-slate-100 hover:border-slate-300'
-                    }`}
-                  >
-                    <img src={preset} className="w-full h-full object-cover" alt={`Preset ${idx + 1}`} />
-                    {editAvatar === preset && (
-                      <span className="absolute inset-0 bg-emerald-600/10 flex items-center justify-center">
-                        <Check className="w-5 h-5 text-emerald-600 stroke-[3]" />
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
-
           {/* Form Fields */}
           <div className="space-y-4 pt-2">
             <div className="space-y-1.5">

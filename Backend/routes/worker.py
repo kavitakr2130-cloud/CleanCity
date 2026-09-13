@@ -522,10 +522,7 @@ def update_profile(current_worker):
             import os
             from werkzeug.utils import secure_filename
 
-            upload_folder = os.path.join(
-                "uploads",
-                "worker_profiles"
-            )
+            upload_folder = Config.UPLOAD_FOLDER
 
             os.makedirs(upload_folder, exist_ok=True)
 
@@ -550,7 +547,7 @@ def update_profile(current_worker):
             profile_photo.save(file_path)
 
             # Store path in database
-            photo_path = file_path.replace("\\", "/")
+            photo_path = os.path.join("uploads", filename).replace("\\", "/")
 
             cursor.execute("""
                 UPDATE workers
@@ -687,7 +684,7 @@ def complete_complaint(current_worker):
 
     filename = secure_filename(image.filename)
 
-    upload_folder = "uploads"
+    upload_folder = Config.UPLOAD_FOLDER
 
     if not os.path.exists(upload_folder):
         os.makedirs(upload_folder)
@@ -711,7 +708,7 @@ def complete_complaint(current_worker):
         WHERE complaint_id=%s
           AND worker_id=%s
     """, (
-        filepath,
+        os.path.join("uploads", filename).replace("\\", "/"),
         complaint_id,
         current_worker["worker_id"]
     ))
