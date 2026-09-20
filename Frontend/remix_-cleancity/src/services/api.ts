@@ -3,6 +3,20 @@ export const BASE_URL = "http://127.0.0.1:5000";
 // ---------------------------
 // Citizen APIs
 // ---------------------------
+export const citizenEmailLogin = async (email: string) => {
+  const response = await fetch(`${BASE_URL}/auth/citizen/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: email.trim(),
+    }),
+  });
+
+  return response.json();
+};
+
 
 export const sendOtp = async (mobile_number: string) => {
   const response = await fetch(`${BASE_URL}/auth/send-otp`, {
@@ -35,6 +49,7 @@ export const verifyOtp = async (
 
   return response.json();
 };
+
 
 // ---------------------------
 // Google Login

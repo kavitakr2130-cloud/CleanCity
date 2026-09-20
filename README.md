@@ -15,6 +15,8 @@ The system consists of separate Frontend and Backend servers that communicate th
 - React.js
 - TypeScript
 - Tailwind CSS
+- Google OAuth / Google Login
+
 
 ### Backend
 - Python
@@ -79,7 +81,7 @@ python app.py
 1. Install MySQL Server and MySQL Workbench.
 2. Create a MySQL database named **cleancity**.
 3. Import the provided **cleancity.sql** file into the `cleancity` database.
-4. Configure the `.env` file with your own database and API credentials.
+4. Configure the Backend `.env` file with your own database, JWT, and Gemini API credentials.
 
 The provided database backup contains the required tables, relationships, and initial system data.
 
@@ -108,6 +110,16 @@ DB_NAME=cleancity
 JWT_SECRET_KEY=your_secret_key
 GEMINI_API_KEY=your_gemini_api_key
 ```
+
+## Google Login
+
+CleanCity supports Google Login for citizens.
+
+The Google OAuth Client ID is configured in the frontend and is used to enable Google Sign-In.
+
+Normal users do not need to provide or configure any Google OAuth credentials.
+
+The Google OAuth Client ID is not a secret. However, any Google OAuth Client Secret, if used by the application, must remain private and must not be uploaded to GitHub.
 
 **Do not upload the actual `.env` file or any API keys/passwords to GitHub.**
 
@@ -138,26 +150,36 @@ If the Gemini service is temporarily unavailable, complaint submission can still
 
 ---
 
+## Authentication
+
+CleanCity supports:
+
+User registration
+Normal login
+JWT-based authentication
+Google Login
+
 ## Main Features
 
 ### Citizen
 
 * Register and log in securely.
 * Submit waste-related complaints with images.
-* Duplicate complaint detection based on complaint location.
+* Duplicate complaint detection based on complaint location and category.
 * Track complaint status.
 * Use Vision AI to analyze complaints.
 * Submit feedback after the complaint is resolved.
 * Receive complaint notifications.
+* Manage profile information.
 
 ### Administrator
 
 * View all complaints submitted by citizens.
 * Monitor complaint statistics and analytics.
 * Assign complaints to the appropriate supervisor.
-* Manage departments and zones.
 * Manage supervisors.
 * Receive complaint-related notifications.
+* Manage administrator profile information.
 
 ### Supervisor
 
@@ -166,6 +188,7 @@ If the Gemini service is temporarily unavailable, complaint submission can still
 * Monitor complaint progress.
 * Verify completed work submitted by workers.
 * Receive assignment and verification notifications.
+* Manage Supervisor profile information.
 
 ### Worker
 
@@ -173,7 +196,7 @@ If the Gemini service is temporarily unavailable, complaint submission can still
 * Perform cleaning operations.
 * Upload "After Cleaning" images as proof of completion.
 * Mark complaints as completed for supervisor verification.
-
+* Manage worker profile information.
 ---
 
 ## Complaint Workflow
@@ -219,7 +242,7 @@ Do not share or upload:
 * JWT secret keys
 * `.env` files
 * User-uploaded complaint images containing private data
-
+* Google OAuth Client IDs may appear in frontend configuration because they identify the OAuth application, but the corresponding Client Secret must remain private.
 ---
 
 ## Developed By

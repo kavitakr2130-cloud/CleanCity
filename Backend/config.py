@@ -11,7 +11,6 @@ class Config:
 
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
-    OTP_EXPIRY_MINUTES = int(os.getenv("OTP_EXPIRY_MINUTES"))
 
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
     MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH"))
@@ -20,6 +19,4 @@ class Config:
     
     GOOGLE_CLIENT_ID = os.getenv("OAUTH_CLIENT_ID")
     
-    TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
-    TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-    TWILIO_VERIFY_SERVICE_SID = os.getenv("TWILIO_VERIFY_SERVICE_SID")
+   

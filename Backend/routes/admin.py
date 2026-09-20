@@ -8,7 +8,10 @@ import bcrypt
 
 admin_bp = Blueprint("admin", __name__)
 
-UPLOAD_FOLDER = "uploads"
+UPLOAD_FOLDER = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "uploads"
+)
 
 
 # -------------------------------
@@ -768,9 +771,19 @@ def update_admin_profile(current_admin):
     # Save profile photo if uploaded
     if profile_photo:
         filename = f"{uuid.uuid4().hex}_{secure_filename(profile_photo.filename)}"
-        profile_photo_path = os.path.join(UPLOAD_FOLDER, filename)
+        
+        project_root = os.path.dirname(
+            os.path.dirname(
+                os.path.dirname(os.path.abspath(__file__))
+            )
+        )
+        upload_folder = os.path.join(project_root, "uploads")
+        if not os.path.exists(upload_folder):  
+            os.makedirs(upload_folder) 
 
-        profile_photo.save(profile_photo_path)
+        profile_photo_path = os.path.join("uploads", filename)
+
+        profile_photo.save(os.path.join(upload_folder, filename))
 
     conn = get_db_connection()
     cursor = conn.cursor()

@@ -11,11 +11,12 @@ import {
   completeGoogleRegistration,
   adminLogin,
   supervisorLogin,
+  citizenEmailLogin,
 } from "../services/api";
 import { GoogleLogin } from '@react-oauth/google';
 
 export const Login: React.FC = () => {
-  const { loginUser, setRole, setIsLoggedIn, currentRole, currentLanguage, setAuthoritySubRole, t, isLoggedIn, checkUserExistsByPhone, checkAuthorityUserExists } = useApp();
+  const { loginUser, setUser, setRole, setIsLoggedIn, currentRole, currentLanguage, setAuthoritySubRole, t, isLoggedIn, checkUserExistsByPhone, checkAuthorityUserExists } = useApp();
   const navigate = useNavigate();
 
 // Auto redirect if already logged in
@@ -111,7 +112,7 @@ const subRole = localStorage.getItem("cleancity_authority_subrole");
   // Handle standard password-based login
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (currentRole === 'citizen') {
+   if (currentRole === 'citizen') {
   if (!usernameInput.trim()) {
     setError('Please enter your email address.');
     return;
@@ -121,14 +122,22 @@ const subRole = localStorage.getItem("cleancity_authority_subrole");
   setError('');
 
   try {
-    const success = await loginUser(usernameInput.trim(), undefined, rememberMe);
+    const data = await citizenEmailLogin(usernameInput.trim());
 
-    if (success) {
+    if (data.existing_user && data.token) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      setIsLoggedIn(true);
+      setRole("citizen");
+
+      await loginUser(data.user.email, undefined, true);
+
       setSuccessToast('Signed in successfully!');
       navigate('/home', { replace: true });
     } else {
-        setGoogleNewUser(true);
-        setGoogleEmail(usernameInput.trim());
+      setGoogleNewUser(true);
+      setGoogleEmail(usernameInput.trim());
     }
   } catch (error) {
     console.error(error);
@@ -772,9 +781,11 @@ const success = await loginUser(usernameInput, password, rememberMe);
       if (data.token) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
+        
 
         setIsLoggedIn(true);
         setRole("citizen");
+        await loginUser(data.user.email, undefined, true);
 
         navigate("/home");
       } else {
